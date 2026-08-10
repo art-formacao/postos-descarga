@@ -4140,6 +4140,10 @@
             return (Number(valor) || 0).toFixed(2);
         }
 
+        function indicadorCorPercentagemFinal(valor) {
+            return Number(valor) <= 90 ? '🟩' : '🟧';
+        }
+
         async function obterLogoBase64() {
             const logo = document.querySelector('.header-logo');
             if (!logo || logo.src.startsWith('data:')) return logo ? logo.src : '';
@@ -4315,7 +4319,7 @@
 
                 corpo += `- Vol. Descarga: ${formatarLitros(desc)} L\n`;
                 corpo += `- Vol. Final: ${formatarLitros(final)} L\n`;
-                corpo += `- 🟧 Percentagem Final: ${formatarPercentagem(percentagemFinal)}%\n\n`;
+                corpo += `- ${indicadorCorPercentagemFinal(percentagemFinal)} Percentagem Final: ${formatarPercentagem(percentagemFinal)}%\n\n`;
             }
 
             // No Android, a partilha nativa é a única forma permitida pelo navegador
