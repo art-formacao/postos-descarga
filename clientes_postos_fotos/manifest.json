@@ -1,5 +1,67 @@
 {
-  "geradoEm": "2026-08-05T13:06:25.505Z",
-  "companhias": [],
-  "postos": []
+  "geradoEm": "2026-08-10T09:03:04.276930Z",
+  "companhias": [
+    {
+      "nome": "BP",
+      "logo": "./clientes_postos_fotos/BP/logo.png"
+    },
+    {
+      "nome": "GALP",
+      "logo": "./clientes_postos_fotos/GALP/logo.png"
+    },
+    {
+      "nome": "Gestroil",
+      "logo": "./clientes_postos_fotos/Gestroil/logo.png"
+    },
+    {
+      "nome": "Prio",
+      "logo": "./clientes_postos_fotos/Prio/logo.png"
+    },
+    {
+      "nome": "Q8",
+      "logo": "./clientes_postos_fotos/Q8/logo.png"
+    },
+    {
+      "nome": "Repsol",
+      "logo": "./clientes_postos_fotos/Repsol/logo.png"
+    }
+  ],
+  "postos": [
+    {
+      "id": "bp-a-comercial-do-alentejo-posto",
+      "companhia": "BP",
+      "nome": "A Comercial do Alentejo, Posto",
+      "gps": "38.7792, -7.418",
+      "obs": "A lojo fica em estrada com dificil entrada",
+      "fotos": [
+        "./clientes_postos_fotos/BP/A%20Comercial%20do%20Alentejo%2C%20Posto/3.jpg",
+        "./clientes_postos_fotos/BP/A%20Comercial%20do%20Alentejo%2C%20Posto/38.77925%2C%20-7.418.jpg",
+        "./clientes_postos_fotos/BP/A%20Comercial%20do%20Alentejo%2C%20Posto/A%20lojo%20fica%20em%20estrada%20com%20dificil%20entrada.jpg"
+      ]
+    },
+    {
+      "id": "bp-a1-mealhada-este-b-e-repa",
+      "companhia": "BP",
+      "nome": "A1 Mealhada (Este) B E REPA",
+      "gps": "40.3331, -8.4936",
+      "obs": "posto sul norte",
+      "fotos": [
+        "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/3.jpg",
+        "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/40.3331%2C%20-8.4936.jpg",
+        "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/posto%20sul%20norte.jpg"
+      ]
+    },
+    {
+      "id": "repsol-repsol-estarreja",
+      "companhia": "Repsol",
+      "nome": "Repsol Estarreja",
+      "gps": "40.754, -8.56877",
+      "obs": "2",
+      "fotos": [
+        "./clientes_postos_fotos/Repsol/Repsol%20Estarreja/2.jpg",
+        "./clientes_postos_fotos/Repsol/Repsol%20Estarreja/3.jpg",
+        "./clientes_postos_fotos/Repsol/Repsol%20Estarreja/40.754012045260026%2C%20-8.568767709953347.jpg"
+      ]
+    }
+  ]
 }
