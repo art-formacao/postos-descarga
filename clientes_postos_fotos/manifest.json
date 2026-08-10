@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-08-10T09:19:55.699726Z",
+  "geradoEm": "2026-08-10T11:29:35.705675Z",
   "companhias": [
     {
       "nome": "BP",
@@ -49,6 +49,42 @@
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/3.jpg",
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/40.3331%2C%20-8.4936.jpg",
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/posto%20sul%20norte.jpg"
+      ]
+    },
+    {
+      "id": "bp-albergaria-sobreiro",
+      "companhia": "BP",
+      "nome": "Albergaria - Sobreiro",
+      "gps": "40.6968, -8.51083",
+      "obs": "Sem observações",
+      "fotos": [
+        "./clientes_postos_fotos/BP/Albergaria%20-%20Sobreiro/3.jpg",
+        "./clientes_postos_fotos/BP/Albergaria%20-%20Sobreiro/40.696760773543105%2C%20-8.510831856840278.jpg",
+        "./clientes_postos_fotos/BP/Albergaria%20-%20Sobreiro/Sem%20observa%C3%A7%C3%B5es.jpg"
+      ]
+    },
+    {
+      "id": "bp-albergaria-a-velha",
+      "companhia": "BP",
+      "nome": "ALBERGARIA-A-VELHA",
+      "gps": "40.6906, -8.47444",
+      "obs": "Posto perto da rotunda, entrar de frente.",
+      "fotos": [
+        "./clientes_postos_fotos/BP/ALBERGARIA-A-VELHA/3.jpg",
+        "./clientes_postos_fotos/BP/ALBERGARIA-A-VELHA/40.69063662854264%2C%20-8.474435166141603.jpg",
+        "./clientes_postos_fotos/BP/ALBERGARIA-A-VELHA/Posto%20perto%20da%20rotunda%2C%20entrar%20de%20frente..jpg"
+      ]
+    },
+    {
+      "id": "bp-bong-s-express-albergaria-a-velha",
+      "companhia": "BP",
+      "nome": "Bongás Express - Albergaria-a-Velha",
+      "gps": "40.7125, -8.48226",
+      "obs": "Posto jundo do PingoDoce Albergaria-a-Velha",
+      "fotos": [
+        "./clientes_postos_fotos/BP/Bong%C3%A1s%20Express%20-%20Albergaria-a-Velha/3.jpg",
+        "./clientes_postos_fotos/BP/Bong%C3%A1s%20Express%20-%20Albergaria-a-Velha/40.71248040836175%2C%20-8.48225830998786.jpg",
+        "./clientes_postos_fotos/BP/Bong%C3%A1s%20Express%20-%20Albergaria-a-Velha/Posto%20jundo%20do%20PingoDoce%20Albergaria-a-Velha.jpg"
       ]
     },
     {
