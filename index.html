@@ -480,6 +480,11 @@
             outline: none;
         }
 
+        .pdf-viewer-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
         .pdf-viewer-zoom-label {
             min-width: 48px;
             color: #ffffff;
@@ -3271,11 +3276,27 @@
         }
 
         function atualizarZoomVisualizadorPDF() {
-            const frame = document.getElementById('frameVisualizadorPDF');
+            const frameAtual = document.getElementById('frameVisualizadorPDF');
             const indicador = document.getElementById('nivelZoomPDF');
-            if (!frame || !urlVisualizadorPDF) return;
+            const botaoMenos = document.getElementById('btnZoomMenosPDF');
+            const botaoMais = document.getElementById('btnZoomMaisPDF');
+            if (!frameAtual || !urlVisualizadorPDF) return;
+
             indicador.textContent = `${zoomVisualizadorPDF}%`;
-            frame.src = criarFonteVisualizadorPDF(urlVisualizadorPDF, zoomVisualizadorPDF);
+            if (botaoMenos) botaoMenos.disabled = zoomVisualizadorPDF <= 50;
+            if (botaoMais) botaoMais.disabled = zoomVisualizadorPDF >= 250;
+
+            const novaFonte = criarFonteVisualizadorPDF(urlVisualizadorPDF, zoomVisualizadorPDF);
+
+            // Alterar apenas o fragmento de um iframe já carregado não atualiza o
+            // zoom em vários visualizadores nativos de PDF (Chrome, Edge e Safari).
+            // Criar um iframe novo obriga o visualizador a aplicar o zoom pedido.
+            const novoFrame = document.createElement('iframe');
+            novoFrame.id = 'frameVisualizadorPDF';
+            novoFrame.className = 'pdf-viewer-frame';
+            novoFrame.title = 'Avaliação Riscos e Rotas em PDF';
+            novoFrame.src = novaFonte;
+            frameAtual.replaceWith(novoFrame);
         }
 
         function dispositivoAndroid() {
@@ -3361,8 +3382,13 @@
             const modalAberto = document.getElementById('modalVisualizadorPDF')?.classList.contains('active');
             if (!modalAberto) return;
             if (evento.key === 'Escape') fecharVisualizadorPDF();
-            else if (evento.key === '+' || evento.key === '=') alterarZoomVisualizadorPDF(25);
-            else if (evento.key === '-') alterarZoomVisualizadorPDF(-25);
+            else if (evento.key === '+' || evento.key === '=') {
+                evento.preventDefault();
+                alterarZoomVisualizadorPDF(25);
+            } else if (evento.key === '-') {
+                evento.preventDefault();
+                alterarZoomVisualizadorPDF(-25);
+            }
         });
 
         function calcularDistanciaHaversineMetros(lat1, lon1, lat2, lon2) {
