@@ -1703,6 +1703,18 @@
         </div>
     </div>
 
+    <!-- MODAL: AUTORIZAÇÃO DO GESTOR PARA DESCARGAS ACIMA DE 90% -->
+    <div id="modalAutorizacaoGestor" class="modal-overlay" style="z-index: 1200;">
+        <div class="modal-card" style="max-width: 340px; text-align: center; border-radius: 20px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">⚠️</div>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Autorização do gestor</div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.3;">A descarga fica acima de 90%. Indique o nome do gestor que autorizou a descarga.</div>
+            <input type="text" id="nomeGestorAutorizacao" autocomplete="name" placeholder="Nome do gestor" aria-label="Nome do gestor que autorizou a descarga" style="width: 100%; margin-bottom: 10px;">
+            <button type="button" class="btn-save-modal" style="margin-top: 0;" onclick="confirmarAutorizacaoGestor()">Confirmar autorização</button>
+            <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="cancelarAutorizacaoGestor()">Cancelar</button>
+        </div>
+    </div>
+
     <!-- MODAL: TICKET DE SONDAGEM -->
     <div id="modalTicketSondagem" class="modal-overlay" style="z-index: 1200;">
         <div class="modal-card" style="max-width: 340px; text-align: center; border-radius: 20px;">
@@ -1914,6 +1926,7 @@
         let ultimaGeolocalizacao = 'Localização ainda não verificada';
         let fotoTicketSondagem = '';
         let fotoTicketTemporaria = '';
+        let nomeGestorQueAutorizou = '';
 
         // URL para sincronização em nuvem via Google Apps Script (Coloque o URL do seu Script se configurado)
         const GOOGLE_SCRIPT_URL = ""; 
@@ -3678,16 +3691,122 @@
             }
         }
 
-        function iniciarFinalizacaoDescarga() {
+        function obterEstadoValidacaoTanques() {
+            if (!Number.isInteger(totalTanques) || totalTanques <= 0) {
+                return { valido: false, tanque: 0, motivo: 'incompleto' };
+            }
+
             for (let i = 1; i <= totalTanques; i++) {
                 const produto = document.getElementById(`combustivel_${i}`);
                 const capacidade = document.getElementById(`capTotal_${i}`);
                 const volumeAtual = document.getElementById(`volAtual_${i}`);
                 const descarga = document.getElementById(`volDescarga_${i}`);
-                if (!produto || !produto.value || !capacidade.value || !volumeAtual.value || !descarga.value) {
-                    alert(`Preencha e confirme todos os dados do tanque ${i} antes de finalizar.`);
-                    return;
+
+                const elementosPresentes = produto && capacidade && volumeAtual && descarga;
+                const dadosPreenchidos = elementosPresentes && produto.value
+                    && capacidade.value.trim() !== ''
+                    && volumeAtual.value.trim() !== ''
+                    && descarga.value.trim() !== '';
+                const dadosConfirmados = dadosPreenchidos
+                    && capacidade.disabled && volumeAtual.disabled && descarga.disabled;
+
+                if (!dadosPreenchidos || !dadosConfirmados) {
+                    return { valido: false, tanque: i, motivo: 'incompleto' };
                 }
+
+                const capTotal = Number(capacidade.value);
+                const volAtual = Number(volumeAtual.value);
+                const volDescarga = Number(descarga.value);
+                const valoresValidos = Number.isFinite(capTotal) && capTotal > 0
+                    && Number.isFinite(volAtual) && volAtual >= 0
+                    && Number.isFinite(volDescarga) && volDescarga > 0;
+
+                if (!valoresValidos) {
+                    return { valido: false, tanque: i, motivo: 'valores-invalidos' };
+                }
+
+                const volFinal = volAtual + volDescarga;
+                if (volFinal > capTotal) {
+                    return {
+                        valido: false,
+                        tanque: i,
+                        motivo: 'excede-capacidade',
+                        percentual: (volFinal / capTotal) * 100
+                    };
+                }
+            }
+
+            return { valido: true };
+        }
+
+        function obterTanquesQueRequeremAutorizacaoGestor() {
+            const tanques = [];
+            const isBP = redeSelecionada.toUpperCase() === 'BP';
+
+            for (let i = 1; i <= totalTanques; i++) {
+                const capacidade = Number(document.getElementById(`capTotal_${i}`).value);
+                const volumeAtual = Number(document.getElementById(`volAtual_${i}`).value);
+                const descarga = Number(document.getElementById(`volDescarga_${i}`).value);
+                if (!Number.isFinite(capacidade) || capacidade <= 0
+                    || !Number.isFinite(volumeAtual) || !Number.isFinite(descarga)) continue;
+
+                const percentualFinal = ((volumeAtual + descarga) / capacidade) * 100;
+                // Corresponde exatamente aos casos em que a interface mostra
+                // "PEDIR AUTORIZAÇÃO AO GESTOR": BP não sifonada até 95%,
+                // ou outras companhias até ao limite de 100%.
+                const requerAutorizacao = isBP
+                    ? !bpTanquesSifonados && percentualFinal > 90 && percentualFinal <= 95
+                    : percentualFinal > 90 && percentualFinal <= 100;
+
+                if (requerAutorizacao) tanques.push(i);
+            }
+            return tanques;
+        }
+
+        function abrirPerguntaAutorizacaoGestor() {
+            const campoNome = document.getElementById('nomeGestorAutorizacao');
+            campoNome.value = '';
+            document.getElementById('modalAutorizacaoGestor').classList.add('active');
+            setTimeout(() => campoNome.focus(), 0);
+        }
+
+        function confirmarAutorizacaoGestor() {
+            const campoNome = document.getElementById('nomeGestorAutorizacao');
+            const nome = campoNome.value.trim().replace(/\s+/g, ' ');
+            if (!nome) {
+                alert('Indique o nome do gestor que autorizou a descarga.');
+                campoNome.focus();
+                return;
+            }
+
+            nomeGestorQueAutorizou = nome;
+            document.getElementById('modalAutorizacaoGestor').classList.remove('active');
+            document.getElementById('modalTicketSondagem').classList.add('active');
+        }
+
+        function cancelarAutorizacaoGestor() {
+            document.getElementById('modalAutorizacaoGestor').classList.remove('active');
+        }
+
+        function iniciarFinalizacaoDescarga() {
+            const estado = obterEstadoValidacaoTanques();
+            if (!estado.valido) {
+                if (estado.motivo === 'excede-capacidade') {
+                    alert(`Não é possível finalizar: a capacidade final do tanque ${estado.tanque} é ${formatarPercentagem(estado.percentual)}% e excede o máximo de 100%.`);
+                } else if (estado.motivo === 'valores-invalidos') {
+                    alert(`Introduza valores válidos no tanque ${estado.tanque}. A capacidade e a descarga devem ser superiores a zero.`);
+                } else {
+                    alert(`Preencha e confirme todos os dados do tanque ${estado.tanque || 1} antes de finalizar.`);
+                }
+                atualizarBotaoFinalizar();
+                return;
+            }
+
+            // Limpa uma autorização anterior antes de iniciar uma nova finalização.
+            nomeGestorQueAutorizou = '';
+            if (obterTanquesQueRequeremAutorizacaoGestor().length > 0) {
+                abrirPerguntaAutorizacaoGestor();
+                return;
             }
             document.getElementById('modalTicketSondagem').classList.add('active');
         }
@@ -3873,14 +3992,17 @@
         function atualizarBotaoFinalizar() {
             const botao = document.getElementById('btnFinalizarDescarga');
             if (!botao) return;
-            const tudoPreenchido = totalTanques > 0 && Array.from({ length: totalTanques }, (_, i) => i + 1).every(i => {
-                const produto = document.getElementById(`combustivel_${i}`);
-                const capacidade = document.getElementById(`capTotal_${i}`);
-                const volumeAtual = document.getElementById(`volAtual_${i}`);
-                const descarga = document.getElementById(`volDescarga_${i}`);
-                return produto && produto.value && capacidade && capacidade.value && volumeAtual && volumeAtual.value && descarga && descarga.value;
-            });
-            botao.disabled = !tudoPreenchido;
+
+            const estado = obterEstadoValidacaoTanques();
+            botao.disabled = !estado.valido;
+
+            if (estado.valido) {
+                botao.title = 'Finalizar descarga';
+            } else if (estado.motivo === 'excede-capacidade') {
+                botao.title = `O tanque ${estado.tanque} excede 100% da capacidade final.`;
+            } else {
+                botao.title = 'Preencha e confirme todos os dados dos tanques.';
+            }
         }
 
         function varColorProduto(nomeProd) {
@@ -4173,8 +4295,11 @@
             corpo += `Companhia: ${redeSelecionada}\n`;
             corpo += `Local/Posto: ${posto}\n`;
             corpo += `Verificação GPS: ${ultimaGeolocalizacao}\n`;
-            corpo += `Ticket de sondagem: ${fotoTicketSondagem ? 'Sim (foto anexada)' : 'Não'}\n\n`;
-            corpo += `--- DETALHES DOS TANQUES ---\n\n`;
+            corpo += `Ticket de sondagem: ${fotoTicketSondagem ? 'Sim (foto anexada)' : 'Não'}\n`;
+            if (nomeGestorQueAutorizou) {
+                corpo += `NOTA: A descarga ficou acima de 90% com autorização de "${nomeGestorQueAutorizou}".\n`;
+            }
+            corpo += `\n--- DETALHES DOS TANQUES ---\n\n`;
 
             for (let i = 1; i <= totalTanques; i++) {
                 const prod = document.getElementById(`combustivel_${i}`).value || "Não selecionado";
@@ -4186,8 +4311,11 @@
                 corpo += `Tanque ${i} [${prod}]:\n`;
                 corpo += `- Cap. Total: ${formatarLitros(cap)} L\n`;
                 corpo += `- Vol. Atual: ${formatarLitros(atual)} L\n`;
+                const percentagemFinal = Number(cap) > 0 ? (final / Number(cap)) * 100 : 0;
+
                 corpo += `- Vol. Descarga: ${formatarLitros(desc)} L\n`;
-                corpo += `- Vol. Final: ${formatarLitros(final)} L\n\n`;
+                corpo += `- Vol. Final: ${formatarLitros(final)} L\n`;
+                corpo += `- 🟧 Percentagem Final: ${formatarPercentagem(percentagemFinal)}%\n\n`;
             }
 
             // No Android, a partilha nativa é a única forma permitida pelo navegador
