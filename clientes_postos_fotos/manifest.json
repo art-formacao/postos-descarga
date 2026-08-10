@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-08-10T09:03:04.276930Z",
+  "geradoEm": "2026-08-10T09:19:55.699726Z",
   "companhias": [
     {
       "nome": "BP",
@@ -49,6 +49,18 @@
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/3.jpg",
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/40.3331%2C%20-8.4936.jpg",
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/posto%20sul%20norte.jpg"
+      ]
+    },
+    {
+      "id": "prio-prio-estarreja",
+      "companhia": "Prio",
+      "nome": "Prio Estarreja",
+      "gps": "40.7516, -8.5714",
+      "obs": "O posto localiza-se à esquerda para a realização da descarga. Recomenda-se contornar a rotunda.",
+      "fotos": [
+        "./clientes_postos_fotos/Prio/Prio%20Estarreja/3.jpg",
+        "./clientes_postos_fotos/Prio/Prio%20Estarreja/40.751634412303844%2C%20-8.571398633873775.jpg",
+        "./clientes_postos_fotos/Prio/Prio%20Estarreja/O%20posto%20localiza-se%20%C3%A0%20esquerda%20para%20a%20realiza%C3%A7%C3%A3o%20da%20descarga.%20Recomenda-se%20contornar%20a%20rotunda..jpg"
       ]
     },
     {
