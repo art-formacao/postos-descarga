@@ -1628,7 +1628,7 @@
                 <div id="tanksContainer"></div>
 
                 <div class="nav-buttons">
-                    <button type="button" class="btn-nav btn-prev" onclick="irParaPasso(4)">← Voltar (Localização &amp; Tanques)</button>
+                    <button type="button" class="btn-nav btn-prev" onclick="pedirConfirmacaoVoltarTanques()">← Voltar (Localização &amp; Tanques)</button>
                     <button type="button" id="btnFinalizarDescarga" class="btn-nav btn-next" disabled="" onclick="iniciarFinalizacaoDescarga()">Finalizar</button>
                 </div>
             </div>
@@ -1700,6 +1700,17 @@
             </div>
             <button type="button" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="confirmarValorModal()">Sim, Confirmar</button>
             <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="fecharModalConfirmaValor()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAÇÃO AO VOLTAR DO FORMULÁRIO DE TANQUES -->
+    <div id="modalConfirmarVoltarTanques" class="modal-overlay" style="z-index: 1200;" role="dialog" aria-modal="true" aria-labelledby="tituloConfirmarVoltarTanques" onclick="fecharConfirmacaoVoltarTanquesAoFundo(event)">
+        <div class="modal-card" style="max-width: 320px; text-align: center; border-radius: 20px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">⚠️</div>
+            <div id="tituloConfirmarVoltarTanques" style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Confirmar</div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.3;">Se voltar atrás, perde a informação inserida. Confirmar?</div>
+            <button type="button" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="confirmarVoltarTanques()">Sim</button>
+            <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="fecharConfirmacaoVoltarTanques()">Não</button>
         </div>
     </div>
 
@@ -1927,6 +1938,12 @@
         let fotoTicketSondagem = '';
         let fotoTicketTemporaria = '';
         let nomeGestorQueAutorizou = '';
+
+        document.addEventListener('keydown', (evento) => {
+            if (evento.key === 'Escape' && document.getElementById('modalConfirmarVoltarTanques').classList.contains('active')) {
+                fecharConfirmacaoVoltarTanques();
+            }
+        });
 
         // URL para sincronização em nuvem via Google Apps Script (Coloque o URL do seu Script se configurado)
         const GOOGLE_SCRIPT_URL = ""; 
@@ -2189,6 +2206,50 @@
             if (passoAtual > 1) {
                 irParaPasso(passoAtual - 1);
             }
+        }
+
+        function haDadosInseridosNosTanques() {
+            const container = document.getElementById('tanksContainer');
+            if (!container) return false;
+
+            return Array.from(container.querySelectorAll('input, select, textarea')).some(campo => {
+                if (campo.matches('input[type="checkbox"], input[type="radio"]')) {
+                    return campo.checked && !campo.defaultChecked;
+                }
+
+                if (campo.tagName === 'SELECT') {
+                    const opcaoSelecionada = campo.options[campo.selectedIndex];
+                    const indicePadrao = Array.from(campo.options).findIndex(opcao => opcao.defaultSelected);
+                    const indiceInicial = indicePadrao >= 0 ? indicePadrao : 0;
+                    return Boolean(campo.value && opcaoSelecionada && !opcaoSelecionada.disabled && campo.selectedIndex !== indiceInicial);
+                }
+
+                return campo.value.trim() !== '' && campo.value !== campo.defaultValue;
+            });
+        }
+
+        function pedirConfirmacaoVoltarTanques() {
+            if (!haDadosInseridosNosTanques()) {
+                irParaPasso(4);
+                return;
+            }
+            document.getElementById('modalConfirmarVoltarTanques').classList.add('active');
+        }
+
+        function fecharConfirmacaoVoltarTanques() {
+            document.getElementById('modalConfirmarVoltarTanques').classList.remove('active');
+        }
+
+        function fecharConfirmacaoVoltarTanquesAoFundo(evento) {
+            if (evento.target === evento.currentTarget) fecharConfirmacaoVoltarTanques();
+        }
+
+        function confirmarVoltarTanques() {
+            // Recria os cartões para eliminar valores, seleções e estados de confirmação desta etapa.
+            campoAConfirmarId = null;
+            gerarFormularioTanques();
+            fecharConfirmacaoVoltarTanques();
+            irParaPasso(4);
         }
 
         function validarPasso1() {
