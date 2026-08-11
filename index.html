@@ -1485,7 +1485,53 @@
     </style>
 </head>
 <body>
+<!-- LOGIN SUPABASE -->
+<div id="loginScreen" style="
+    position:fixed;
+    inset:0;
+    background:#f5f5f7;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999999;
+">
+    <div style="
+        background:white;
+        width:90%;
+        max-width:400px;
+        padding:30px;
+        border-radius:16px;
+        box-shadow:0 10px 30px rgba(0,0,0,.15);
+        text-align:center;
+    ">
+        <h2 style="margin-bottom:25px;">TJA Descargas</h2>
 
+        <input
+            id="loginEmail"
+            type="email"
+            placeholder="E-mail"
+            autocomplete="username"
+            style="width:100%;padding:12px;margin-bottom:12px;box-sizing:border-box;"
+        >
+
+        <input
+            id="loginPassword"
+            type="password"
+            placeholder="Palavra-passe"
+            autocomplete="current-password"
+            style="width:100%;padding:12px;margin-bottom:15px;box-sizing:border-box;"
+        >
+
+        <button
+            id="loginButton"
+            style="width:100%;padding:12px;background:#0063A8;color:white;border:0;border-radius:8px;cursor:pointer;"
+        >
+            Entrar
+        </button>
+
+        <p id="loginMessage" style="color:#c00;margin-top:15px;"></p>
+    </div>
+</div>
     <div id="exportArea">
         <header id="appHeader">
             <div id="headerSpacerLeft"></div>
@@ -4449,6 +4495,72 @@
             window.location.href = `mailto:${destinatario}?subject=${assunto}&body=${encodeURIComponent(corpo)}`;
         }
     </script>
+<script>
+const SUPABASE_URL = "https://zdnxgxbtiofmecmfixbq.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zDFO_Vf0Evp9HEJdZYavAw_kgCZH3PS";
 
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+
+const loginScreen = document.getElementById("loginScreen");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginButton = document.getElementById("loginButton");
+const loginMessage = document.getElementById("loginMessage");
+
+async function verificarSessao() {
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+        loginScreen.style.display = "none";
+    } else {
+        loginScreen.style.display = "flex";
+    }
+}
+
+loginButton.addEventListener("click", async () => {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+
+    loginMessage.textContent = "";
+
+    if (!email || !password) {
+        loginMessage.textContent = "Preenche o e-mail e a palavra-passe.";
+        return;
+    }
+
+    loginButton.disabled = true;
+    loginButton.textContent = "A entrar...";
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        loginMessage.textContent = "E-mail ou palavra-passe incorretos.";
+        loginButton.disabled = false;
+        loginButton.textContent = "Entrar";
+        return;
+    }
+
+    loginScreen.style.display = "none";
+
+    loginButton.disabled = false;
+    loginButton.textContent = "Entrar";
+});
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        loginScreen.style.display = "none";
+    } else {
+        loginScreen.style.display = "flex";
+    }
+});
+
+verificarSessao();
+</script>
 
 </body></html>
