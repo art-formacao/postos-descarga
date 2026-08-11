@@ -1482,54 +1482,173 @@
         .pdf-mode #tanksContainer.compact-six .result-box { padding: 2px 3px !important; }
         .pdf-mode #tanksContainer.compact-six .result-box .status { font-size: 0.52rem !important; }
         .pdf-mode #tanksContainer.compact-six .result-box .info { font-size: 0.48rem !important; }
+
+
+        /* ECRÃ DE AUTENTICAÇÃO */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            background: linear-gradient(180deg, #eef3f7 0%, #f7f8fa 100%);
+        }
+
+        .login-card {
+            width: min(100%, 430px);
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid rgba(0, 99, 168, 0.10);
+            border-radius: 22px;
+            box-shadow: 0 22px 60px rgba(10, 45, 73, 0.18);
+        }
+
+        .login-brand-band {
+            min-height: 112px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 22px 32px;
+            background: linear-gradient(135deg, #005791 0%, #0076c8 100%);
+        }
+
+        .login-logo {
+            display: block;
+            width: min(100%, 280px);
+            max-height: 70px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.10));
+        }
+
+        .login-content {
+            padding: 30px 32px 32px;
+            text-align: center;
+        }
+
+        .login-content h2 {
+            margin-bottom: 6px;
+            color: var(--text-primary);
+            font-size: 1.55rem;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+        }
+
+        .login-subtitle {
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .login-field {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .login-field label {
+            display: block;
+            margin: 0 0 7px 2px;
+            color: #3a3a3c;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .login-field input {
+            width: 100%;
+            min-height: 50px;
+            padding: 12px 14px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            background: #f7f8fa;
+            border: 1px solid #d7dde3;
+            border-radius: 11px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .login-field input:focus {
+            background: #ffffff;
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 3px rgba(0, 99, 168, 0.14);
+        }
+
+        #loginButton {
+            width: 100%;
+            min-height: 50px;
+            margin-top: 5px;
+            padding: 12px 18px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            background: var(--brand-color);
+            border: 0;
+            border-radius: 11px;
+            cursor: pointer;
+            box-shadow: 0 5px 14px rgba(0, 99, 168, 0.22);
+            transition: transform 0.15s, background 0.2s, opacity 0.2s;
+        }
+
+        #loginButton:hover { background: #004f87; }
+        #loginButton:active { transform: scale(0.985); }
+        #loginButton:disabled { cursor: wait; opacity: 0.68; }
+
+        #loginMessage {
+            min-height: 20px;
+            margin-top: 14px;
+            color: #c62828;
+            font-size: 0.84rem;
+            line-height: 1.4;
+        }
+
+        #logoutButton {
+            margin-left: auto;
+            z-index: 2;
+            gap: 6px;
+            min-width: 66px;
+            font-size: 0.78rem !important;
+        }
+
+        #logoutButton:disabled { cursor: wait; opacity: 0.65; }
+        .logout-icon { font-size: 1rem; line-height: 1; }
+
+        @media (max-width: 480px) {
+            #loginScreen { padding: 16px; }
+            .login-brand-band { min-height: 94px; padding: 18px 28px; }
+            .login-logo { max-height: 58px; }
+            .login-content { padding: 25px 22px 26px; }
+            .login-content h2 { font-size: 1.35rem; }
+            header h1 { width: calc(100% - 188px); }
+        }
+
     </style>
 </head>
 <body>
 <!-- LOGIN SUPABASE -->
-<div id="loginScreen" style="
-    position:fixed;
-    inset:0;
-    background:#f5f5f7;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:999999;
-">
-    <div style="
-        background:white;
-        width:90%;
-        max-width:400px;
-        padding:30px;
-        border-radius:16px;
-        box-shadow:0 10px 30px rgba(0,0,0,.15);
-        text-align:center;
-    ">
-        <h2 style="margin-bottom:25px;">TJA Descargas</h2>
+<div id="loginScreen" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="login-card">
+        <div class="login-brand-band">
+            <img id="loginLogo" class="login-logo" alt="Logótipo TJA">
+        </div>
 
-        <input
-            id="loginEmail"
-            type="email"
-            placeholder="E-mail"
-            autocomplete="username"
-            style="width:100%;padding:12px;margin-bottom:12px;box-sizing:border-box;"
-        >
+        <form id="loginForm" class="login-content" novalidate>
+            <h2 id="loginTitle">TJA Descargas</h2>
+            <p class="login-subtitle">Inicie sessão para aceder à aplicação.</p>
 
-        <input
-            id="loginPassword"
-            type="password"
-            placeholder="Palavra-passe"
-            autocomplete="current-password"
-            style="width:100%;padding:12px;margin-bottom:15px;box-sizing:border-box;"
-        >
+            <div class="login-field">
+                <label for="loginEmail">E-mail</label>
+                <input id="loginEmail" type="email" placeholder="nome@empresa.pt" autocomplete="username" inputmode="email" required>
+            </div>
 
-        <button
-            id="loginButton"
-            style="width:100%;padding:12px;background:#0063A8;color:white;border:0;border-radius:8px;cursor:pointer;"
-        >
-            Entrar
-        </button>
+            <div class="login-field">
+                <label for="loginPassword">Palavra-passe</label>
+                <input id="loginPassword" type="password" placeholder="Introduza a palavra-passe" autocomplete="current-password" required>
+            </div>
 
-        <p id="loginMessage" style="color:#c00;margin-top:15px;"></p>
+            <button id="loginButton" type="submit">Entrar</button>
+            <p id="loginMessage" role="alert" aria-live="polite"></p>
+        </form>
     </div>
 </div>
     <div id="exportArea">
@@ -1539,6 +1658,10 @@
 
             <h1 id="headerTitle">Verificação descarga</h1>
 
+            <button id="logoutButton" class="btn-header" type="button" title="Terminar sessão" aria-label="Terminar sessão">
+                <span class="logout-icon" aria-hidden="true">↪</span>
+                <span>Sair</span>
+            </button>
         </header>
 
         <div id="pdfHeaderInfo">
@@ -4505,59 +4628,94 @@ const supabaseClient = window.supabase.createClient(
 );
 
 const loginScreen = document.getElementById("loginScreen");
+const loginForm = document.getElementById("loginForm");
 const loginEmail = document.getElementById("loginEmail");
 const loginPassword = document.getElementById("loginPassword");
 const loginButton = document.getElementById("loginButton");
 const loginMessage = document.getElementById("loginMessage");
+const loginLogo = document.getElementById("loginLogo");
+const logoutButton = document.getElementById("logoutButton");
 
-async function verificarSessao() {
-    const { data } = await supabaseClient.auth.getSession();
+// Reutiliza o logótipo incorporado no cabeçalho, evitando duplicar a imagem no ficheiro.
+loginLogo.src = document.querySelector(".header-logo").src;
 
-    if (data.session) {
-        loginScreen.style.display = "none";
-    } else {
-        loginScreen.style.display = "flex";
-    }
+function mostrarLogin(mostrar) {
+    loginScreen.style.display = mostrar ? "flex" : "none";
+    document.body.style.overflow = mostrar ? "hidden" : "";
+    if (mostrar) window.setTimeout(() => loginEmail.focus(), 50);
 }
 
-loginButton.addEventListener("click", async () => {
+async function verificarSessao() {
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (error) {
+        loginMessage.textContent = "Não foi possível verificar a sessão. Tente novamente.";
+        mostrarLogin(true);
+        return;
+    }
+
+    mostrarLogin(!data.session);
+}
+
+loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
     const email = loginEmail.value.trim();
     const password = loginPassword.value;
-
     loginMessage.textContent = "";
 
     if (!email || !password) {
-        loginMessage.textContent = "Preenche o e-mail e a palavra-passe.";
+        loginMessage.textContent = "Preencha o e-mail e a palavra-passe.";
+        (!email ? loginEmail : loginPassword).focus();
         return;
     }
 
     loginButton.disabled = true;
-    loginButton.textContent = "A entrar...";
+    loginButton.textContent = "A entrar…";
 
-    const { error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
+    try {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-    if (error) {
-        loginMessage.textContent = "E-mail ou palavra-passe incorretos.";
+        if (error) {
+            loginMessage.textContent = "E-mail ou palavra-passe incorretos.";
+            loginPassword.select();
+            return;
+        }
+
+        loginPassword.value = "";
+        mostrarLogin(false);
+    } catch (error) {
+        console.error("Erro ao iniciar sessão:", error);
+        loginMessage.textContent = "Não foi possível ligar ao serviço. Verifique a internet e tente novamente.";
+    } finally {
         loginButton.disabled = false;
         loginButton.textContent = "Entrar";
-        return;
     }
+});
 
-    loginScreen.style.display = "none";
+logoutButton.addEventListener("click", async () => {
+    logoutButton.disabled = true;
+    logoutButton.querySelector("span:last-child").textContent = "A sair…";
 
-    loginButton.disabled = false;
-    loginButton.textContent = "Entrar";
+    try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+
+        loginForm.reset();
+        loginMessage.textContent = "";
+        mostrarLogin(true);
+    } catch (error) {
+        console.error("Erro ao terminar sessão:", error);
+        window.alert("Não foi possível terminar a sessão. Tente novamente.");
+    } finally {
+        logoutButton.disabled = false;
+        logoutButton.querySelector("span:last-child").textContent = "Sair";
+    }
 });
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (session) {
-        loginScreen.style.display = "none";
-    } else {
-        loginScreen.style.display = "flex";
-    }
+    mostrarLogin(!session);
+    if (!session) loginPassword.value = "";
 });
 
 verificarSessao();
