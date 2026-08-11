@@ -1051,7 +1051,71 @@
             align-items: center;
             border-bottom: 1px solid rgba(0,0,0,0.05);
             padding-bottom: 6px;
+            position: relative;
+            min-height: 38px;
         }
+
+        /* Seletor individual de tanques sifonados (estilo iOS) */
+        .siphon-switch-wrap {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            z-index: 2;
+        }
+
+        .siphon-switch-wrap.visible { display: flex; }
+        .siphon-switch-label {
+            font-size: 0.56rem;
+            line-height: 1;
+            color: var(--text-secondary);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .siphon-switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 24px;
+        }
+        .siphon-switch input {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+        .siphon-slider {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            background: #d1d1d6;
+            border-radius: 999px;
+            transition: background-color .2s ease;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,.04);
+        }
+        .siphon-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 2px;
+            top: 2px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,.28);
+            transition: transform .2s ease;
+        }
+        .siphon-switch input:checked + .siphon-slider { background: #34c759; }
+        .siphon-switch input:checked + .siphon-slider::before { transform: translateX(18px); }
+        .siphon-switch input:focus-visible + .siphon-slider {
+            outline: 3px solid rgba(0,122,255,.28);
+            outline-offset: 2px;
+        }
+        .tank-card.siphoned { border-color: rgba(52,199,89,.65); }
 
         .tank-card-title {
             font-weight: 600;
@@ -1883,16 +1947,15 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIRMAÇÃO TANQUES SIFONADOS -->
-    <div id="modalSifonadosConfirm" class="modal-overlay" style="z-index: 1200;">
+    <!-- AVISO PARA PRODUTOS IGUAIS EM MAIS DO QUE UM TANQUE -->
+    <div id="modalSifonadosConfirm" class="modal-overlay" style="z-index: 1200;" role="alertdialog" aria-modal="true" aria-labelledby="tituloAvisoSifonados">
         <div class="modal-card" style="max-width: 320px; text-align: center; border-radius: 20px;">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">⚠️</div>
-            <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Companhia BP</div>
+            <div id="tituloAvisoSifonados" style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Atenção</div>
             <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.3;">
-                Selecionou tanques com o mesmo produto.<br><br><strong>Os tanques são sifonados?</strong>
+                Selecionou o mesmo produto em mais do que um tanque.<br><br>Caso os tanques sejam sifonados, confirme a opção <strong>“Sifonado”</strong>.
             </div>
-            <button type="button" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="responderSifonados(true)">Sim, Confirmar</button>
-            <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="responderSifonados(false)">Cancelar</button>
+            <button type="button" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="fecharAvisoSifonados()">OK</button>
         </div>
     </div>
 
@@ -2138,7 +2201,7 @@
         let gestoZoomVisualizador = false;
         let arrastarImagemVisualizador = false;
 
-        let bpTanquesSifonados = false; // Estado para verificação de tanques sifonados na BP
+        let tanquesSifonados = new Set(); // Apenas os tanques com o seletor individual ativo
         let campoAConfirmarId = null;
         let ultimaGeolocalizacao = 'Localização ainda não verificada';
         let fotoTicketSondagem = '';
@@ -3105,7 +3168,7 @@
 
         function selecionarRedePosto(rede) {
             redeSelecionada = rede;
-            bpTanquesSifonados = false;
+            tanquesSifonados.clear();
             document.getElementById('headerTitle').innerText = `Verificação • ${rede}`;
             
             carregarDropdownPostos(rede);
@@ -3882,6 +3945,7 @@
         function gerarFormularioTanques() {
             const container = document.getElementById('tanksContainer');
             container.innerHTML = '';
+            tanquesSifonados.clear();
 
             const produtosDisponiveis = obterListaProdutosCompanhiaAtual();
             let opcoesProdutosHTML = `<option value="" selected disabled>-- Selecionar Produto --</option>`;
@@ -3894,6 +3958,13 @@
                     <div class="tank-card" id="card_${i}">
                         <div class="tank-card-header">
                             <span class="tank-card-title" id="tankTitle_${i}"></span>
+                            <div class="siphon-switch-wrap" id="siphonWrap_${i}">
+                                <span class="siphon-switch-label" id="siphonLabel_${i}">Sifonado</span>
+                                <label class="siphon-switch" title="Marcar o tanque ${i} como sifonado">
+                                    <input type="checkbox" id="sifonado_${i}" onchange="alternarTanqueSifonado(${i}, this.checked)" aria-label="Tanque ${i} sifonado">
+                                    <span class="siphon-slider"></span>
+                                </label>
+                            </div>
                             <span class="fuel-badge" id="badge_${i}">Pendente</span>
                         </div>
                         
@@ -3993,12 +4064,18 @@
                 }
 
                 const volFinal = volAtual + volDescarga;
-                if (volFinal > capTotal) {
+                const percentualFinal = (volFinal / capTotal) * 100;
+                const companhiaBP = redeSelecionada.trim().toUpperCase() === 'BP';
+                const limitePercentual = companhiaBP ? 95 : 100;
+
+                if (percentualFinal > limitePercentual) {
                     return {
                         valido: false,
                         tanque: i,
-                        motivo: 'excede-capacidade',
-                        percentual: (volFinal / capTotal) * 100
+                        motivo: 'excede-limite',
+                        percentual: percentualFinal,
+                        limite: limitePercentual,
+                        companhia: companhiaBP ? 'BP' : 'outra'
                     };
                 }
             }
@@ -4022,7 +4099,7 @@
                 // "PEDIR AUTORIZAÇÃO AO GESTOR": BP não sifonada até 95%,
                 // ou outras companhias até ao limite de 100%.
                 const requerAutorizacao = isBP
-                    ? !bpTanquesSifonados && percentualFinal > 90 && percentualFinal <= 95
+                    ? !tanqueEstaSifonado(i) && percentualFinal > 90 && percentualFinal <= 95
                     : percentualFinal > 90 && percentualFinal <= 100;
 
                 if (requerAutorizacao) tanques.push(i);
@@ -4058,14 +4135,21 @@
         function iniciarFinalizacaoDescarga() {
             const estado = obterEstadoValidacaoTanques();
             if (!estado.valido) {
-                if (estado.motivo === 'excede-capacidade') {
-                    alert(`Não é possível finalizar: a capacidade final do tanque ${estado.tanque} é ${formatarPercentagem(estado.percentual)}% e excede o máximo de 100%.`);
+                if (estado.motivo === 'excede-limite') {
+                    const nomeCompanhia = estado.companhia === 'BP' ? 'Na companhia BP' : 'Nesta companhia';
+                    alert(`${nomeCompanhia}, não é possível finalizar: a ocupação final do tanque ${estado.tanque} é ${formatarPercentagem(estado.percentual)}% e excede o limite de ${estado.limite}%.`);
                 } else if (estado.motivo === 'valores-invalidos') {
                     alert(`Introduza valores válidos no tanque ${estado.tanque}. A capacidade e a descarga devem ser superiores a zero.`);
                 } else {
                     alert(`Preencha e confirme todos os dados do tanque ${estado.tanque || 1} antes de finalizar.`);
                 }
                 atualizarBotaoFinalizar();
+                return;
+            }
+
+            const erroSifonagem = obterErroValidacaoSifonagem();
+            if (erroSifonagem) {
+                alert(erroSifonagem);
                 return;
             }
 
@@ -4214,39 +4298,102 @@
                 }
             }
 
-            // Regra BP: Verificar se selecionou 2 tanques com o mesmo produto
-            verificarRegraBPSifonados();
-            recalcularTodosTanques();
-        }
+            atualizarSeletoresSifonados();
 
-        function verificarRegraBPSifonados() {
-            if (redeSelecionada.toUpperCase() !== "BP") {
-                bpTanquesSifonados = false;
-                return;
-            }
-
-            const produtosSelecionados = [];
-            for (let i = 1; i <= totalTanques; i++) {
-                const el = document.getElementById(`combustivel_${i}`);
-                if (el && el.value) {
-                    produtosSelecionados.push(el.value);
+            // Mostra apenas um aviso quando o produto escolhido já está noutro tanque.
+            if (valor) {
+                const existeProdutoIgualNoutroTanque = Array.from({ length: totalTanques }, (_, i) => i + 1)
+                    .some(i => i !== index && obterProdutoTanque(i) === valor);
+                if (existeProdutoIgualNoutroTanque) {
+                    document.getElementById('modalSifonadosConfirm').classList.add('active');
                 }
             }
 
-            // Verifica se há pelo menos 2 tanques com o mesmo produto
-            const temDuplicado = produtosSelecionados.some((prod, idx) => produtosSelecionados.indexOf(prod) !== idx);
+            recalcularTodosTanques();
+        }
 
-            if (temDuplicado) {
-                document.getElementById('modalSifonadosConfirm').classList.add('active');
-            } else {
-                bpTanquesSifonados = false;
+        function fecharAvisoSifonados() {
+            document.getElementById('modalSifonadosConfirm').classList.remove('active');
+        }
+
+        function obterProdutoTanque(index) {
+            const campo = document.getElementById(`combustivel_${index}`);
+            return campo ? campo.value.trim() : '';
+        }
+
+        function tanqueEstaSifonado(index) {
+            const seletor = document.getElementById(`sifonado_${index}`);
+            const envolvente = document.getElementById(`siphonWrap_${index}`);
+            return Boolean(seletor && seletor.checked && envolvente && envolvente.classList.contains('visible'));
+        }
+
+        function atualizarSeletoresSifonados() {
+            const grupos = new Map();
+            for (let i = 1; i <= totalTanques; i++) {
+                const produto = obterProdutoTanque(i);
+                if (!produto) continue;
+                if (!grupos.has(produto)) grupos.set(produto, []);
+                grupos.get(produto).push(i);
+            }
+
+            for (let i = 1; i <= totalTanques; i++) {
+                const produto = obterProdutoTanque(i);
+                const elegivel = Boolean(produto && grupos.get(produto) && grupos.get(produto).length >= 2);
+                const envolvente = document.getElementById(`siphonWrap_${i}`);
+                const seletor = document.getElementById(`sifonado_${i}`);
+                const card = document.getElementById(`card_${i}`);
+                const etiqueta = document.getElementById(`siphonLabel_${i}`);
+                if (envolvente) envolvente.classList.toggle('visible', elegivel);
+
+                if (!elegivel) {
+                    tanquesSifonados.delete(i);
+                    if (seletor) seletor.checked = false;
+                    if (etiqueta) etiqueta.innerText = 'Sifonado';
+                    if (card) card.classList.remove('siphoned');
+                }
             }
         }
 
-        function responderSifonados(isSifonados) {
-            bpTanquesSifonados = isSifonados;
-            document.getElementById('modalSifonadosConfirm').classList.remove('active');
+        function alternarTanqueSifonado(index, ativo) {
+            const produto = obterProdutoTanque(index);
+            const iguais = [];
+            for (let i = 1; i <= totalTanques; i++) {
+                if (produto && obterProdutoTanque(i) === produto) iguais.push(i);
+            }
+
+            const seletor = document.getElementById(`sifonado_${index}`);
+            if (ativo && iguais.length < 2) {
+                if (seletor) seletor.checked = false;
+                tanquesSifonados.delete(index);
+                alert('O seletor de sifonagem só pode ser usado em tanques com o mesmo produto.');
+                return;
+            }
+
+            if (ativo) tanquesSifonados.add(index);
+            else tanquesSifonados.delete(index);
+            const card = document.getElementById(`card_${index}`);
+            const etiqueta = document.getElementById(`siphonLabel_${index}`);
+            if (card) card.classList.toggle('siphoned', ativo);
+            if (etiqueta) etiqueta.innerText = ativo ? 'Sifonado ✓' : 'Sifonado';
             recalcularTodosTanques();
+        }
+
+        function obterErroValidacaoSifonagem() {
+            const ativosPorProduto = new Map();
+            for (let i = 1; i <= totalTanques; i++) {
+                if (!tanqueEstaSifonado(i)) continue;
+                const produto = obterProdutoTanque(i);
+                if (!ativosPorProduto.has(produto)) ativosPorProduto.set(produto, []);
+                ativosPorProduto.get(produto).push(i);
+            }
+
+            const gruposInvalidos = [...ativosPorProduto.entries()].filter(([, indices]) => indices.length < 2);
+            if (!gruposInvalidos.length) return '';
+
+            const detalhe = gruposInvalidos
+                .map(([produto, indices]) => `${produto}: tanque ${indices.join(', ')}`)
+                .join('\n');
+            return `Para tanques sifonados, tem de ativar pelo menos 2 tanques com o mesmo produto.\n\nVerifique:\n${detalhe}`;
         }
 
         function recalcularTodosTanques() {
@@ -4261,12 +4408,14 @@
             if (!botao) return;
 
             const estado = obterEstadoValidacaoTanques();
-            botao.disabled = !estado.valido;
+            // Se o limite for excedido, mantém o botão clicável apenas para mostrar
+            // o aviso com OK; a função de finalização continua bloqueada.
+            botao.disabled = !estado.valido && estado.motivo !== 'excede-limite';
 
             if (estado.valido) {
                 botao.title = 'Finalizar descarga';
-            } else if (estado.motivo === 'excede-capacidade') {
-                botao.title = `O tanque ${estado.tanque} excede 100% da capacidade final.`;
+            } else if (estado.motivo === 'excede-limite') {
+                botao.title = `O tanque ${estado.tanque} excede o limite de ${estado.limite}% e não pode ser finalizado.`;
             } else {
                 botao.title = 'Preencha e confirme todos os dados dos tanques.';
             }
@@ -4342,7 +4491,7 @@
             const isBP = (redeSelecionada.toUpperCase() === "BP");
 
             if (isBP) {
-                if (bpTanquesSifonados) {
+                if (tanqueEstaSifonado(index)) {
                     // Limite máximo BP Sifonados: 80%
                     const capMax80 = capTotal * 0.80;
                     const folga80 = capMax80 - volFinal;
