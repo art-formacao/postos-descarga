@@ -1959,6 +1959,18 @@
         </div>
     </div>
 
+    <!-- AVISO CENTRAL: É OBRIGATÓRIO SELECIONAR 2 TANQUES SIFONADOS -->
+    <div id="modalRegraSifonados" class="modal-overlay" style="z-index: 1300;" role="alertdialog" aria-modal="true" aria-labelledby="tituloRegraSifonados" aria-describedby="textoRegraSifonados">
+        <div class="modal-card" style="max-width: 360px; text-align: center; border-radius: 20px;">
+            <div style="font-size: 1.8rem; margin-bottom: 6px;">⚠️</div>
+            <div id="tituloRegraSifonados" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 10px;">Condições por cumprir</div>
+            <div id="textoRegraSifonados" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.4;">
+                Selecionou apenas 1 tanque sifonado. Selecione mais um tanque sifonado com o mesmo produto para continuar a preencher os dados e poder finalizar.
+            </div>
+            <button type="button" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="fecharAvisoRegraSifonados()">OK</button>
+        </div>
+    </div>
+
     <!-- MODAL CONFIRMAÇÃO DE CAPACIDADE/VOLUMES -->
     <div id="modalConfirmaValor" class="modal-overlay" style="z-index: 1200;">
         <div class="modal-card" style="max-width: 320px; text-align: center; border-radius: 20px;">
@@ -4133,6 +4145,12 @@
         }
 
         function iniciarFinalizacaoDescarga() {
+            const erroSifonagem = obterErroValidacaoSifonagem();
+            if (erroSifonagem) {
+                mostrarAvisoRegraSifonados(erroSifonagem.replace(/\n+/g, ' '));
+                return;
+            }
+
             const estado = obterEstadoValidacaoTanques();
             if (!estado.valido) {
                 if (estado.motivo === 'excede-limite') {
@@ -4144,12 +4162,6 @@
                     alert(`Preencha e confirme todos os dados do tanque ${estado.tanque || 1} antes de finalizar.`);
                 }
                 atualizarBotaoFinalizar();
-                return;
-            }
-
-            const erroSifonagem = obterErroValidacaoSifonagem();
-            if (erroSifonagem) {
-                alert(erroSifonagem);
                 return;
             }
 
@@ -4327,6 +4339,43 @@
             return Boolean(seletor && seletor.checked && envolvente && envolvente.classList.contains('visible'));
         }
 
+        function obterTanquesSifonadosAtivos() {
+            const ativos = [];
+            for (let i = 1; i <= totalTanques; i++) {
+                if (tanqueEstaSifonado(i)) ativos.push(i);
+            }
+            return ativos;
+        }
+
+        function mostrarAvisoRegraSifonados(mensagem) {
+            const texto = document.getElementById('textoRegraSifonados');
+            if (texto && mensagem) texto.textContent = mensagem;
+            document.getElementById('modalRegraSifonados').classList.add('active');
+        }
+
+        function fecharAvisoRegraSifonados() {
+            document.getElementById('modalRegraSifonados').classList.remove('active');
+        }
+
+        function atualizarBloqueioPreenchimentoSifonados(mostrarAviso = false) {
+            const quantidade = obterTanquesSifonadosAtivos().length;
+            const bloqueado = quantidade === 1;
+
+            // Mantém os seletores de sifonagem disponíveis, mas bloqueia os restantes
+            // campos até existir o segundo tanque sifonado.
+            document.querySelectorAll('#tanksContainer .tank-controls-container').forEach(container => {
+                container.style.pointerEvents = bloqueado ? 'none' : '';
+                container.style.opacity = bloqueado ? '0.55' : '';
+                container.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
+            });
+
+            if (!bloqueado) fecharAvisoRegraSifonados();
+            if (bloqueado && mostrarAviso) {
+                mostrarAvisoRegraSifonados('Selecionou apenas 1 tanque sifonado. Selecione mais um tanque sifonado com o mesmo produto para continuar a preencher os dados e poder finalizar.');
+            }
+            return bloqueado;
+        }
+
         function atualizarSeletoresSifonados() {
             const grupos = new Map();
             for (let i = 1; i <= totalTanques; i++) {
@@ -4375,31 +4424,34 @@
             const etiqueta = document.getElementById(`siphonLabel_${index}`);
             if (card) card.classList.toggle('siphoned', ativo);
             if (etiqueta) etiqueta.innerText = ativo ? 'Sifonado ✓' : 'Sifonado';
+            atualizarBloqueioPreenchimentoSifonados(true);
             recalcularTodosTanques();
         }
 
         function obterErroValidacaoSifonagem() {
-            const ativosPorProduto = new Map();
-            for (let i = 1; i <= totalTanques; i++) {
-                if (!tanqueEstaSifonado(i)) continue;
-                const produto = obterProdutoTanque(i);
-                if (!ativosPorProduto.has(produto)) ativosPorProduto.set(produto, []);
-                ativosPorProduto.get(produto).push(i);
+            const tanquesAtivos = obterTanquesSifonadosAtivos();
+
+            // Uma descarga sem tanques sifonados continua válida. Quando a opção
+            // Sifonado é utilizada, têm de estar selecionados exatamente 2 tanques.
+            if (tanquesAtivos.length === 0) return '';
+            if (tanquesAtivos.length !== 2) {
+                return `Não é possível finalizar com ${tanquesAtivos.length} tanque${tanquesAtivos.length === 1 ? '' : 's'} sifonado${tanquesAtivos.length === 1 ? '' : 's'}.\n\nSelecione exatamente 2 tanques sifonados com o mesmo produto.`;
             }
 
-            const gruposInvalidos = [...ativosPorProduto.entries()].filter(([, indices]) => indices.length < 2);
-            if (!gruposInvalidos.length) return '';
+            const produtoPrimeiro = obterProdutoTanque(tanquesAtivos[0]);
+            const produtoSegundo = obterProdutoTanque(tanquesAtivos[1]);
+            if (!produtoPrimeiro || produtoPrimeiro !== produtoSegundo) {
+                return 'Os 2 tanques sifonados têm de ter o mesmo produto.';
+            }
 
-            const detalhe = gruposInvalidos
-                .map(([produto, indices]) => `${produto}: tanque ${indices.join(', ')}`)
-                .join('\n');
-            return `Para tanques sifonados, tem de ativar pelo menos 2 tanques com o mesmo produto.\n\nVerifique:\n${detalhe}`;
+            return '';
         }
 
         function recalcularTodosTanques() {
             for (let i = 1; i <= totalTanques; i++) {
                 calcularTanque(i);
             }
+            atualizarBloqueioPreenchimentoSifonados(false);
             atualizarBotaoFinalizar();
         }
 
@@ -4408,6 +4460,16 @@
             if (!botao) return;
 
             const estado = obterEstadoValidacaoTanques();
+            const erroSifonagem = obterErroValidacaoSifonagem();
+
+            // Enquanto a regra dos sifonados não estiver cumprida, o botão mantém-se
+            // clicável apenas para apresentar a carta de aviso ao centro do ecrã.
+            if (erroSifonagem) {
+                botao.disabled = false;
+                botao.title = 'Selecione exatamente 2 tanques sifonados com o mesmo produto.';
+                return;
+            }
+
             // Se o limite for excedido, mantém o botão clicável apenas para mostrar
             // o aviso com OK; a função de finalização continua bloqueada.
             botao.disabled = !estado.valido && estado.motivo !== 'excede-limite';
