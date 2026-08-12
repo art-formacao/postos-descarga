@@ -1967,6 +1967,18 @@
             border-bottom: 1px solid var(--card-border);
         }
 
+        #step4 .profile-location-heading {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: nowrap;
+            gap: 7px;
+            white-space: nowrap;
+        }
+
+        #step4 .profile-location-heading .gps-status-title {
+            font-size: 0.9rem;
+        }
+
         #step4 .profile-detail-row > label {
             display: block;
             margin-bottom: 7px;
@@ -2187,10 +2199,12 @@
                         <div class="profile-main-grid">
                             <div class="profile-details-card">
                                 <section id="profileLocationRow" class="profile-detail-row profile-location-row">
-                                    <label>Localização do Posto:</label>
+                                    <label class="profile-location-heading">
+                                        <span>Localização do Posto:</span>
+                                        <span id="gpsStatusTitle" class="gps-status-title gps-warn">A verificar localização...</span>
+                                    </label>
                                     <div class="gps-distance-box">
                                         <div class="gps-info-text">
-                                            <span id="gpsStatusTitle" class="gps-status-title gps-warn">📍 A verificar localização...</span>
                                             <span id="gpsDistVal" class="gps-dist-val">--</span>
                                         </div>
                                         <button type="button" class="btn-recalc-gps" onclick="calcularDistanciaAtualPosto()">🔄 Recalcular Posição</button>
@@ -4267,12 +4281,12 @@
 
                     if (metros <= 20) {
                         titleEl.className = "gps-status-title gps-ok";
-                        titleEl.innerText = "✅ Está no posto correto!";
+                        titleEl.innerText = "Está no posto";
                         distEl.innerText = `Distância: ${textoDistancia} (dentro do raio de 20m)`;
                         ultimaGeolocalizacao = `Posto correto — posição: ${latUser.toFixed(6)}, ${lonUser.toFixed(6)}; distância: ${textoDistancia} (raio permitido: 20 m)`;
                     } else {
                         titleEl.className = "gps-status-title gps-warn";
-                        titleEl.innerText = "❌ NÃO está no posto!";
+                        titleEl.innerText = "Não está no posto";
                         distEl.innerText = `A ${textoDistancia} do posto (Raio permitido: 20m)`;
                         ultimaGeolocalizacao = `Fora do raio do posto — posição: ${latUser.toFixed(6)}, ${lonUser.toFixed(6)}; distância: ${textoDistancia} (raio permitido: 20 m)`;
                     }
