@@ -1666,16 +1666,33 @@
             line-height: 1.4;
         }
 
+        .login-signature {
+            margin-top: 18px;
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            line-height: 1.4;
+        }
+
         #logoutButton {
             margin-left: auto;
             z-index: 2;
-            gap: 6px;
-            min-width: 66px;
-            font-size: 0.78rem !important;
+            min-width: auto;
+            padding: 4px 6px !important;
+            background: transparent;
+            border-color: transparent;
+            font-size: 0.72rem !important;
+            font-weight: 500;
+            opacity: 0.82;
+            backdrop-filter: none;
         }
 
-        #logoutButton:disabled { cursor: wait; opacity: 0.65; }
-        .logout-icon { font-size: 1rem; line-height: 1; }
+        #logoutButton:hover,
+        #logoutButton:focus-visible {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+
+        #logoutButton:disabled { cursor: wait; opacity: 0.55; }
 
         @media (max-width: 480px) {
             #loginScreen { padding: 16px; }
@@ -1712,6 +1729,7 @@
 
             <button id="loginButton" type="submit">Entrar</button>
             <p id="loginMessage" role="alert" aria-live="polite"></p>
+            <p class="login-signature">Desenvolvido por Artiom Fedco (TJA - Dep. Formação, 2026)</p>
         </form>
     </div>
 </div>
@@ -1723,7 +1741,6 @@
             <h1 id="headerTitle">Verificação descarga</h1>
 
             <button id="logoutButton" class="btn-header" type="button" title="Terminar sessão" aria-label="Terminar sessão">
-                <span class="logout-icon" aria-hidden="true">↪</span>
                 <span>Sair</span>
             </button>
         </header>
@@ -1830,8 +1847,8 @@
                         </div>
 
                         <div id="containerNavButtonsView" class="maps-buttons-container" style="display: none;">
-                            <a id="btnNavegarMaps" class="btn-nav-app btn-gmaps" target="_blank">🗺️ Google Maps</a>
-                            <a id="btnNavegarWaze" class="btn-nav-app btn-waze" target="_blank">🚙 Waze</a>
+                            <a id="btnNavegarMaps" class="btn-nav-app btn-gmaps" target="_blank" rel="noopener noreferrer">🗺️ Google Maps</a>
+                            <a id="btnNavegarWaze" class="btn-nav-app btn-waze" target="_blank" rel="noopener noreferrer">🚙 Waze</a>
                         </div>
 
                         <div id="containerObsView" style="display: none;">
@@ -1920,6 +1937,20 @@
 
         </div>
         <footer class="app-footer">Desenvolvido por Artiom Fedco (TJA - Dep. Formação, 2026)</footer>
+    </div>
+
+    <!-- AVISO ANTES DE ABRIR O GOOGLE MAPS OU WAZE -->
+    <div id="modalAvisoNavegacao" class="modal-overlay" style="z-index: 1400;" role="alertdialog" aria-modal="true" aria-labelledby="tituloAvisoNavegacao" aria-describedby="textoAvisoNavegacao" onclick="fecharAvisoNavegacaoAoFundo(event)">
+        <div class="modal-card" style="max-width: 380px; text-align: center; border-radius: 20px;">
+            <div style="font-size: 2rem; margin-bottom: 4px;">⚠️</div>
+            <div id="tituloAvisoNavegacao" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Atenção antes de navegar</div>
+            <div id="textoAvisoNavegacao" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.45;">
+                Este sistema de navegação <strong>não programa nem garante o trajeto definido para chegar a este posto</strong>.<br><br>
+                Antes de seguir viagem, consulte sempre o ficheiro <strong>“Avaliação Riscos Rotas”</strong> e siga a rota nele indicada.
+            </div>
+            <button type="button" id="btnAceitarAvisoNavegacao" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="aceitarAvisoNavegacao()">Aceito</button>
+            <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="fecharAvisoNavegacao()">Cancelar</button>
+        </div>
     </div>
 
     <!-- VISUALIZADOR RÁPIDO DO PDF AVALIAÇÃO RISCOS/ROTAS -->
@@ -3632,6 +3663,62 @@
             distanciaInicialVisualizador = 0;
         }, { passive: true });
 
+        let urlNavegacaoPendente = '';
+        let elementoFocadoAntesDoAvisoNavegacao = null;
+
+        function abrirAvisoNavegacao(evento) {
+            if (evento) evento.preventDefault();
+
+            const botao = evento?.currentTarget;
+            const modal = document.getElementById('modalAvisoNavegacao');
+            const botaoAceitar = document.getElementById('btnAceitarAvisoNavegacao');
+            const url = botao?.getAttribute('href') || '';
+            if (!modal || !botaoAceitar || !url) return;
+
+            urlNavegacaoPendente = url;
+            elementoFocadoAntesDoAvisoNavegacao = botao;
+            modal.classList.add('active');
+            botaoAceitar.focus();
+        }
+
+        function fecharAvisoNavegacao() {
+            const modal = document.getElementById('modalAvisoNavegacao');
+            if (!modal) return;
+
+            modal.classList.remove('active');
+            urlNavegacaoPendente = '';
+            if (elementoFocadoAntesDoAvisoNavegacao && typeof elementoFocadoAntesDoAvisoNavegacao.focus === 'function') {
+                elementoFocadoAntesDoAvisoNavegacao.focus();
+            }
+            elementoFocadoAntesDoAvisoNavegacao = null;
+        }
+
+        function fecharAvisoNavegacaoAoFundo(evento) {
+            if (evento.target === evento.currentTarget) fecharAvisoNavegacao();
+        }
+
+        function aceitarAvisoNavegacao() {
+            const url = urlNavegacaoPendente;
+            fecharAvisoNavegacao();
+            if (!url) return;
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        document.getElementById('btnNavegarMaps').addEventListener('click', abrirAvisoNavegacao);
+        document.getElementById('btnNavegarWaze').addEventListener('click', abrirAvisoNavegacao);
+
+        document.addEventListener('keydown', (evento) => {
+            const modalAberto = document.getElementById('modalAvisoNavegacao')?.classList.contains('active');
+            if (modalAberto && evento.key === 'Escape') fecharAvisoNavegacao();
+        });
+
         let urlVisualizadorPDF = '';
         let zoomVisualizadorPDF = 100;
         let elementoFocadoAntesDoPDF = null;
@@ -4905,8 +4992,10 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 logoutButton.addEventListener("click", async () => {
+    if (!window.confirm("Tem a certeza de que quer sair?")) return;
+
     logoutButton.disabled = true;
-    logoutButton.querySelector("span:last-child").textContent = "A sair…";
+    logoutButton.querySelector("span").textContent = "A sair…";
 
     try {
         const { error } = await supabaseClient.auth.signOut();
@@ -4920,7 +5009,7 @@ logoutButton.addEventListener("click", async () => {
         window.alert("Não foi possível terminar a sessão. Tente novamente.");
     } finally {
         logoutButton.disabled = false;
-        logoutButton.querySelector("span:last-child").textContent = "Sair";
+        logoutButton.querySelector("span").textContent = "Sair";
     }
 });
 
