@@ -4857,6 +4857,7 @@
             const agora = new Date();
             const dataHoraEnvio = agora.toLocaleString('pt-PT');
             const assuntoTexto = `Relatório de Descarga - ${redeSelecionada} (${posto})`;
+            const tanquesSifonadosEmail = obterTanquesSifonadosAtivos();
 
             let corpo = `RELATÓRIO DE DESCARGA DE COMBUSTÍVEL\n\n`;
             corpo += `Data e hora de envio: ${dataHoraEnvio}\n`;
@@ -4865,6 +4866,15 @@
             corpo += `Local/Posto: ${posto}\n`;
             corpo += `Verificação GPS: ${ultimaGeolocalizacao}\n`;
             corpo += `Ticket de sondagem: ${fotoTicketSondagem ? 'Sim (foto anexada)' : 'Não'}\n`;
+            if (tanquesSifonadosEmail.length > 0) {
+                const listaTanquesSifonados = tanquesSifonadosEmail
+                    .map(numero => `Tanque ${numero}`)
+                    .join(' e ');
+                const produtosSifonados = [...new Set(
+                    tanquesSifonadosEmail.map(numero => obterProdutoTanque(numero)).filter(Boolean)
+                )].join(', ');
+                corpo += `Tanques sifonados: ${listaTanquesSifonados}${produtosSifonados ? ` (${produtosSifonados})` : ''}\n`;
+            }
             if (nomeGestorQueAutorizou) {
                 corpo += `NOTA: A descarga ficou acima de 90% com autorização de "${nomeGestorQueAutorizou}".\n`;
             }
