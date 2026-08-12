@@ -779,11 +779,11 @@
 
         .btn-riscos-rotas {
             background-color: var(--brand-color);
-            width: calc(50% - 4px);
-            min-height: 36px;
-            padding: 6px 8px;
-            font-size: 0.66rem;
-            line-height: 1.05;
+            width: 100%;
+            min-height: 54px;
+            padding: 10px 12px;
+            font-size: 0.86rem;
+            line-height: 1.15;
             flex-shrink: 0;
         }
 
@@ -1263,6 +1263,36 @@
 
         .input-with-ok input {
             flex: 1;
+            min-width: 0;
+        }
+
+        /* Passo 5: as quatro linhas de cada tanque ficam maiores e mais legíveis. */
+        #step5 .tank-controls-container {
+            gap: 10px;
+        }
+
+        #step5 .tank-controls-container .input-row-single > label {
+            font-size: 0.95rem;
+            margin-bottom: 7px;
+        }
+
+        #step5 .tank-controls-container select,
+        #step5 .tank-controls-container input[type="number"] {
+            min-height: 52px;
+            padding: 12px 14px;
+            font-size: 1.05rem;
+            font-weight: 650;
+        }
+
+        #step5 .input-with-ok {
+            gap: 8px;
+        }
+
+        #step5 .btn-ok-inline {
+            min-width: 54px;
+            height: 52px;
+            padding: 10px 14px;
+            font-size: 1rem;
         }
 
         .btn-ok-inline {
@@ -1415,6 +1445,16 @@
             font-weight: 800;
         }
         .btn-prev { background-color: #e5e5ea; color: var(--text-primary); }
+
+        /* Todos os botões Voltar, Continuar e Finalizar usam o tamanho do Continuar do passo 4. */
+        .btn-prev,
+        .btn-next {
+            min-height: 66px;
+            padding: 17px 20px;
+            font-size: 1.08rem;
+            font-weight: 700;
+        }
+
         .btn-pdf { background-color: #34c759; color: #ffffff; }
         .btn-email { background-color: #0078d4; color: #ffffff; }
 
@@ -1954,6 +1994,16 @@
             align-items: flex-start;
         }
 
+        #step4 .profile-risks-row {
+            flex: 0 0 auto;
+            padding: 10px 12px 12px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        #step4 .profile-risks-row .btn-riscos-rotas {
+            margin: 0;
+        }
+
         #step4 .profile-photo-card {
             padding: 0;
             background: #000000;
@@ -2132,10 +2182,6 @@
                     <div id="postoProfileView" class="posto-profile-view">
                         <div class="profile-title">
                             <span>⛽ Perfil do Posto</span>
-                            <a id="btnAvaliacaoRiscosRotas" class="btn-nav-app btn-riscos-rotas" role="button" target="_blank" rel="noopener noreferrer" title="Visualizar Avaliação Riscos/Rotas em PDF">
-                                <span class="pdf-emoji" aria-hidden="true">📄</span>
-                                <span>Avaliação<br>Riscos Rotas</span>
-                            </a>
                         </div>
 
                         <div class="profile-main-grid">
@@ -2155,6 +2201,13 @@
                                     <label>Observações do Posto:</label>
                                     <div id="viewObsTexto" class="view-obs-box"></div>
                                 </section>
+
+                                <div class="profile-risks-row">
+                                    <a id="btnAvaliacaoRiscosRotas" class="btn-nav-app btn-riscos-rotas" role="button" target="_blank" rel="noopener noreferrer" title="Visualizar Avaliação Riscos/Rotas em PDF">
+                                        <span class="pdf-emoji" aria-hidden="true">📄</span>
+                                        <span>Avaliação Riscos Rotas</span>
+                                    </a>
+                                </div>
                             </div>
 
                             <div class="profile-photo-card">
