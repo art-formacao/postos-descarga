@@ -64,20 +64,22 @@
             align-items: center;
             gap: 8px;
             width: 100%;
-            min-height: 52px;
-            padding: 6px 18px;
+            min-height: 68px;
+            padding: 8px 18px;
             background-color: var(--brand-color);
             color: #ffffff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             flex-shrink: 0;
-            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         header h1 {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 180px);
+            position: static;
+            flex: 1;
+            min-width: 0;
+            width: auto;
             font-size: 0.95rem;
             font-weight: 600;
             color: #ffffff;
@@ -89,8 +91,8 @@
         }
 
         .header-logo {
-            width: 92px;
-            max-height: 28px;
+            width: 128px;
+            max-height: 42px;
             object-fit: contain;
             object-position: left center;
             cursor: pointer;
@@ -1720,7 +1722,7 @@
             .login-logo { max-height: 58px; }
             .login-content { padding: 25px 22px 26px; }
             .login-content h2 { font-size: 1.35rem; }
-            header h1 { width: calc(100% - 188px); }
+            header h1 { font-size: 0.9rem; }
         }
 
     </style>
