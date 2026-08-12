@@ -1716,6 +1716,68 @@
 
         #logoutButton:disabled { cursor: wait; opacity: 0.55; }
 
+        /* Layout móvel em ecrã completo: remove os cartões exteriores e amplia o conteúdo. */
+        @media (max-width: 600px) {
+            html, body {
+                background: #ffffff;
+            }
+
+            #exportArea {
+                padding-bottom: 8px;
+            }
+
+            .container {
+                max-width: none;
+                padding: 8px 6px 0;
+            }
+
+            .step.active {
+                gap: 10px;
+            }
+
+            /* No passo de localização, o conteúdo passa a ocupar praticamente toda a largura. */
+            #step4 .posto-card,
+            #step4 .posto-profile-view {
+                padding: 0;
+                margin: 0;
+                gap: 10px;
+                background: transparent;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+
+            #step4 .photo-slider-container {
+                height: clamp(220px, 64vw, 300px);
+                border-left: 0;
+                border-right: 0;
+                border-radius: 8px;
+            }
+
+            #step4 .maps-buttons-container {
+                gap: 6px;
+            }
+
+            #step4 .btn-nav-app {
+                min-height: 42px;
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+
+            #step4 .profile-title,
+            #step4 #containerObsView,
+            #step4 #containerPerguntaProdutos,
+            #step4 #containerPerguntaTanques,
+            #step4 .gps-distance-box,
+            #step4 .checkbox-container,
+            #step4 .nav-buttons {
+                margin-left: 2px;
+                margin-right: 2px;
+            }
+        }
+
         @media (max-width: 480px) {
             #loginScreen { padding: 16px; }
             .login-brand-band { min-height: 94px; padding: 18px 28px; }
