@@ -2114,16 +2114,31 @@
 
         .posto-confirmado-card {
             display: grid;
-            grid-template-columns: minmax(130px, 1fr) minmax(280px, 2.4fr) minmax(130px, 1fr);
+            grid-template-columns: minmax(180px, 0.9fr) minmax(280px, 2.4fr);
             align-items: center;
             gap: 12px;
             padding: 10px 12px;
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-medium);
             background: rgba(255,255,255,0.78);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             flex-shrink: 0;
+            transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+
+        /* No passo 5, toda a carta mostra o resultado da validação GPS. */
+        .posto-confirmado-card.gps-inside {
+            border-color: #218838;
+            background: #dff3e4;
+            box-shadow: 0 3px 12px rgba(33, 136, 56, 0.18);
+        }
+
+        .posto-confirmado-card.gps-outside,
+        .posto-confirmado-card.gps-error {
+            border-color: #c62828;
+            background: #fde3e1;
+            box-shadow: 0 3px 12px rgba(198, 40, 40, 0.18);
         }
 
         #infoPostoConfirmado {
@@ -2137,27 +2152,33 @@
 
         .posto-gps-side {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             min-width: 0;
         }
 
-        .posto-gps-side .gps-location-badge {
-            width: 100%;
-            max-width: 190px;
+        .posto-gps-message {
+            font-size: 0.9rem;
+            line-height: 1.2;
+            font-weight: 850;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
         }
+
+        .posto-gps-message.inside { color: #176b2c; }
+        .posto-gps-message.outside,
+        .posto-gps-message.error { color: #a51f17; }
+        .posto-gps-message.checking { color: #6f5700; }
 
         @media (max-width: 700px) {
             .posto-confirmado-card {
-                grid-template-columns: minmax(78px, 0.8fr) minmax(130px, 1.5fr) minmax(78px, 0.8fr);
-                gap: 6px;
-                padding: 8px 6px;
+                grid-template-columns: minmax(112px, 0.9fr) minmax(130px, 1.5fr);
+                gap: 8px;
+                padding: 9px 8px;
             }
 
-            .posto-gps-side .gps-location-badge {
-                min-height: 48px;
-                padding: 6px 5px;
-                border-radius: 12px;
-                font-size: 0.66rem;
+            .posto-gps-message {
+                font-size: 0.69rem;
                 overflow-wrap: anywhere;
             }
 
@@ -2390,14 +2411,11 @@
             <!-- PASSO 5: Form de Tanques -->
             <div id="step5" class="step">
                 <div class="question-title">Capacidade Total Tanques Cliente</div>
-                <div class="posto-confirmado-card">
+                <div class="posto-confirmado-card" id="postoConfirmadoCard">
                     <div class="posto-gps-side" role="status" aria-live="polite">
-                        <span class="gps-location-badge checking" data-gps-location-status>📍 A verificar localização...</span>
+                        <span class="posto-gps-message checking" data-gps-card-status>A verificar...</span>
                     </div>
                     <div id="infoPostoConfirmado"></div>
-                    <div class="posto-gps-side" aria-hidden="true">
-                        <span class="gps-location-badge checking" data-gps-location-status>📍 A verificar localização...</span>
-                    </div>
                 </div>
                 <div id="avisoRegraProdutos" role="status" aria-live="polite" style="padding: 9px 12px; border-radius: var(--radius-medium); font-weight: 650; font-size: 0.84rem; text-align: center; border: 1px solid rgba(0,122,255,.28); background: rgba(0,122,255,.08); color: var(--text-primary);"></div>
 
@@ -4425,6 +4443,23 @@
                 el.className = `gps-location-badge ${estado}`;
                 el.textContent = texto;
             });
+
+            const card = document.getElementById('postoConfirmadoCard');
+            const mensagemCard = document.querySelector('[data-gps-card-status]');
+            if (!card || !mensagemCard) return;
+
+            card.classList.remove('gps-inside', 'gps-outside', 'gps-error');
+            mensagemCard.className = `posto-gps-message ${estado}`;
+
+            if (estado === 'inside') {
+                card.classList.add('gps-inside');
+                mensagemCard.textContent = '✅ Está no posto certo!';
+            } else if (estado === 'outside' || estado === 'error') {
+                card.classList.add(estado === 'outside' ? 'gps-outside' : 'gps-error');
+                mensagemCard.textContent = '❌ Não está no posto!';
+            } else {
+                mensagemCard.textContent = 'A verificar...';
+            }
         }
 
         function concluirVerificacaoGps() {
