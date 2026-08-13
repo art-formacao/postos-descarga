@@ -4892,10 +4892,25 @@
             const select = document.getElementById(`combustivel_${index}`);
             const badge = document.getElementById(`badge_${index}`);
             const titleEl = document.getElementById(`tankTitle_${index}`);
+            const anterior = select.dataset.valorAnterior || '';
             let valor = select.value;
 
-            if (valor && obterProdutosDistintosSelecionados().length > totalProdutos) {
-                const anterior = select.dataset.valorAnterior || '';
+            // Não aceita uma repetição que torne impossível atingir a quantidade
+            // de produtos diferentes indicada no passo anterior. Exemplo: ao
+            // escolher 2 produtos para 2 tanques, o segundo tanque é obrigado
+            // a ter um produto diferente do primeiro.
+            const quantidadeDistinta = obterProdutosDistintosSelecionados().length;
+            const tanquesAindaSemProduto = Array.from({ length: totalTanques }, (_, i) => i + 1)
+                .filter(i => !obterProdutoTanque(i)).length;
+            const faltamEspacosParaProdutosDistintos = valor
+                && totalProdutos > 1
+                && quantidadeDistinta + tanquesAindaSemProduto < totalProdutos;
+
+            if (faltamEspacosParaProdutosDistintos) {
+                select.value = anterior;
+                valor = select.value;
+                alert(`Selecionou ${totalProdutos} produtos. Escolha um produto diferente neste tanque para garantir ${totalProdutos} tipos de produto diferentes na descarga.`);
+            } else if (valor && obterProdutosDistintosSelecionados().length > totalProdutos) {
                 select.value = anterior;
                 valor = select.value;
                 const textoLimite = totalProdutos === 1
