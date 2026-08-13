@@ -2291,6 +2291,7 @@
             <div id="step5" class="step">
                 <div class="question-title">Capacidade Total Tanques Cliente</div>
                 <div id="infoPostoConfirmado" style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: var(--radius-medium); font-weight: 500; color: var(--text-primary); font-size: 0.85rem; text-align: center; border: 1px solid var(--card-border); flex-shrink: 0;"></div>
+                <div id="avisoRegraProdutos" role="status" aria-live="polite" style="padding: 9px 12px; border-radius: var(--radius-medium); font-weight: 650; font-size: 0.84rem; text-align: center; border: 1px solid rgba(0,122,255,.28); background: rgba(0,122,255,.08); color: var(--text-primary);"></div>
 
                 <div id="tanksContainer"></div>
 
@@ -2411,7 +2412,7 @@
         <div class="modal-card" style="max-width: 340px; text-align: center; border-radius: 20px;">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">⚠️</div>
             <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Autorização do gestor</div>
-            <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.3;">A descarga fica acima de 90%. Indique o nome do gestor que autorizou a descarga.</div>
+            <div id="textoAutorizacaoGestor" style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.3;">A descarga fica acima de 90%. Indique o nome do gestor que autorizou a descarga.</div>
             <input type="text" id="nomeGestorAutorizacao" class="gestor-autorizacao-input" autocomplete="name" placeholder="Nome do gestor" aria-label="Nome do gestor que autorizou a descarga" style="width: 100%; margin-bottom: 10px;">
             <button type="button" class="btn-save-modal" style="margin-top: 0;" onclick="confirmarAutorizacaoGestor()">Confirmar autorização</button>
             <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="cancelarAutorizacaoGestor()">Cancelar</button>
@@ -2643,6 +2644,8 @@
         let fotoTicketTemporaria = '';
         let nomeGestorQueAutorizou = '';
         let nomePessoaQueInformouCargaNaoCabe = '';
+        let tanquesAutorizadosPeloGestor = [];
+        let tanquesQueNaoCabem = [];
 
         document.addEventListener('keydown', (evento) => {
             if (evento.key === 'Escape' && document.getElementById('modalConfirmarVoltarTanques').classList.contains('active')) {
@@ -4478,7 +4481,7 @@
                             <div class="tank-controls-container">
                                 <div class="input-row-single">
                                     <label>Combustível / Produto</label>
-                                    <select id="combustivel_${i}" onchange="validarEAtualizarProduto(${i})">
+                                    <select id="combustivel_${i}" onfocus="guardarProdutoAnterior(${i})" onchange="validarEAtualizarProduto(${i})">
                                         ${opcoesProdutosHTML}
                                     </select>
                                 </div>
@@ -4520,6 +4523,7 @@
                 `;
                 container.innerHTML += card;
             }
+            atualizarAvisoRegraProdutos();
         }
 
         function obterEstadoValidacaoTanques() {
@@ -4604,9 +4608,36 @@
             return tanques;
         }
 
+        function formatarListaTanques(numeros) {
+            const tanques = numeros.map(numero => `Tanque ${numero}`);
+            if (tanques.length <= 1) return tanques[0] || '';
+            return `${tanques.slice(0, -1).join(', ')} e ${tanques[tanques.length - 1]}`;
+        }
+
+        function obterTanquesQueExcedemLimiteAutorizado() {
+            const tanques = [];
+            const isBP = redeSelecionada.trim().toUpperCase() === 'BP';
+
+            for (let i = 1; i <= totalTanques; i++) {
+                const capacidade = Number(document.getElementById(`capTotal_${i}`).value);
+                const volumeAtual = Number(document.getElementById(`volAtual_${i}`).value);
+                const descarga = Number(document.getElementById(`volDescarga_${i}`).value);
+                if (!Number.isFinite(capacidade) || capacidade <= 0
+                    || !Number.isFinite(volumeAtual) || !Number.isFinite(descarga)) continue;
+
+                const percentualFinal = ((volumeAtual + descarga) / capacidade) * 100;
+                const limite = isBP ? (tanqueEstaSifonado(i) ? 80 : 95) : 100;
+                if (percentualFinal > limite) tanques.push(i);
+            }
+            return tanques;
+        }
+
         function abrirPerguntaAutorizacaoGestor() {
             const campoNome = document.getElementById('nomeGestorAutorizacao');
+            const texto = document.getElementById('textoAutorizacaoGestor');
+            const lista = formatarListaTanques(tanquesAutorizadosPeloGestor);
             campoNome.value = '';
+            texto.textContent = `${lista || 'A descarga'} fica acima de 90%. Indique o nome do gestor que autorizou a descarga.`;
             document.getElementById('modalAutorizacaoGestor').classList.add('active');
             setTimeout(() => campoNome.focus(), 0);
         }
@@ -4633,7 +4664,8 @@
             const campoNome = document.getElementById('nomePessoaDescargaNaoAutorizada');
             const texto = document.getElementById('textoDescargaNaoAutorizada');
             campoNome.value = '';
-            texto.textContent = `A carga não cabe: o tanque ${estado.tanque} fica com ${formatarPercentagem(estado.percentual)}%, acima do limite autorizado de ${estado.limite}%. Indique o nome da pessoa que informou.`;
+            const lista = formatarListaTanques(tanquesQueNaoCabem.length ? tanquesQueNaoCabem : [estado.tanque]);
+            texto.textContent = `A carga não cabe em ${lista}. Indique o nome da pessoa que informou.`;
             document.getElementById('modalDescargaNaoAutorizada').classList.add('active');
             setTimeout(() => campoNome.focus(), 0);
         }
@@ -4649,6 +4681,10 @@
 
             nomePessoaQueInformouCargaNaoCabe = nome;
             document.getElementById('modalDescargaNaoAutorizada').classList.remove('active');
+            if (tanquesAutorizadosPeloGestor.length > 0) {
+                abrirPerguntaAutorizacaoGestor();
+                return;
+            }
             document.getElementById('modalTicketSondagem').classList.add('active');
         }
 
@@ -4657,6 +4693,13 @@
         }
 
         function iniciarFinalizacaoDescarga() {
+            const erroProdutos = obterErroRegraQuantidadeProdutos();
+            if (erroProdutos) {
+                alert(erroProdutos);
+                atualizarAvisoRegraProdutos();
+                return;
+            }
+
             const erroSifonagem = obterErroValidacaoSifonagem();
             if (erroSifonagem) {
                 mostrarAvisoRegraSifonados(erroSifonagem.replace(/\n+/g, ' '));
@@ -4677,11 +4720,13 @@
             // Limpa os nomes anteriores antes de iniciar uma nova finalização.
             nomeGestorQueAutorizou = '';
             nomePessoaQueInformouCargaNaoCabe = '';
+            tanquesAutorizadosPeloGestor = obterTanquesQueRequeremAutorizacaoGestor();
+            tanquesQueNaoCabem = obterTanquesQueExcedemLimiteAutorizado();
             if (!estado.valido && estado.motivo === 'excede-limite') {
                 abrirDescargaNaoAutorizada(estado);
                 return;
             }
-            if (obterTanquesQueRequeremAutorizacaoGestor().length > 0) {
+            if (tanquesAutorizadosPeloGestor.length > 0) {
                 abrirPerguntaAutorizacaoGestor();
                 return;
             }
@@ -4795,11 +4840,70 @@
             recalcularTodosTanques();
         }
 
+        function obterProdutosDistintosSelecionados() {
+            const produtos = [];
+            for (let i = 1; i <= totalTanques; i++) {
+                const produto = obterProdutoTanque(i);
+                if (produto && !produtos.includes(produto)) produtos.push(produto);
+            }
+            return produtos;
+        }
+
+        function obterErroRegraQuantidadeProdutos() {
+            const quantidadeDistinta = obterProdutosDistintosSelecionados().length;
+            if (!Number.isInteger(totalProdutos) || totalProdutos <= 0) return '';
+            if (quantidadeDistinta === totalProdutos) return '';
+
+            if (totalProdutos === 1) {
+                return quantidadeDistinta === 0
+                    ? 'Selecione o produto da descarga. Todos os tanques devem ter o mesmo produto.'
+                    : 'Selecionou 1 produto no passo anterior. Todos os tanques devem ter o mesmo produto.';
+            }
+
+            return `Selecionou ${totalProdutos} produtos no passo anterior. Nos tanques têm de existir exatamente ${totalProdutos} tipos de produto diferentes; neste momento existem ${quantidadeDistinta}.`;
+        }
+
+        function atualizarAvisoRegraProdutos() {
+            const aviso = document.getElementById('avisoRegraProdutos');
+            if (!aviso) return;
+            const quantidadeDistinta = obterProdutosDistintosSelecionados().length;
+            const regraCumprida = quantidadeDistinta === totalProdutos;
+
+            if (totalProdutos === 1) {
+                aviso.innerHTML = regraCumprida
+                    ? '✅ Foi selecionado <strong>1 produto</strong>. Todos os tanques devem manter este mesmo produto.'
+                    : 'ℹ️ Selecionou <strong>1 produto</strong>. Se a descarga for feita para vários tanques, todos devem ter o mesmo produto.';
+            } else {
+                aviso.innerHTML = regraCumprida
+                    ? `✅ Foram indicados os <strong>${totalProdutos} tipos de produto</strong> selecionados.`
+                    : `ℹ️ Selecionou <strong>${totalProdutos} produtos</strong>. Indique exatamente ${totalProdutos} tipos de produto diferentes nos tanques. Selecionados até agora: <strong>${quantidadeDistinta}</strong>.`;
+            }
+
+            aviso.style.background = regraCumprida ? 'rgba(52,199,89,.10)' : 'rgba(0,122,255,.08)';
+            aviso.style.borderColor = regraCumprida ? 'rgba(52,199,89,.35)' : 'rgba(0,122,255,.28)';
+        }
+
+        function guardarProdutoAnterior(index) {
+            const select = document.getElementById(`combustivel_${index}`);
+            if (select) select.dataset.valorAnterior = select.value;
+        }
+
         function validarEAtualizarProduto(index) {
             const select = document.getElementById(`combustivel_${index}`);
             const badge = document.getElementById(`badge_${index}`);
             const titleEl = document.getElementById(`tankTitle_${index}`);
-            const valor = select.value;
+            let valor = select.value;
+
+            if (valor && obterProdutosDistintosSelecionados().length > totalProdutos) {
+                const anterior = select.dataset.valorAnterior || '';
+                select.value = anterior;
+                valor = select.value;
+                const textoLimite = totalProdutos === 1
+                    ? 'Selecionou 1 produto. Todos os tanques têm de ter o mesmo produto.'
+                    : `Selecionou ${totalProdutos} produtos. Só pode indicar ${totalProdutos} tipos de produto diferentes nos tanques.`;
+                alert(textoLimite);
+            }
+            select.dataset.valorAnterior = valor;
 
             if (valor) {
                 badge.innerText = valor;
@@ -4825,6 +4929,7 @@
             }
 
             atualizarSeletoresSifonados();
+            atualizarAvisoRegraProdutos();
 
             // Mostra apenas um aviso quando o produto escolhido já está noutro tanque.
             if (valor) {
@@ -4975,6 +5080,13 @@
 
             const estado = obterEstadoValidacaoTanques();
             const erroSifonagem = obterErroValidacaoSifonagem();
+            const erroProdutos = obterErroRegraQuantidadeProdutos();
+
+            if (erroProdutos && estado.valido) {
+                botao.disabled = false;
+                botao.title = erroProdutos;
+                return;
+            }
 
             // Enquanto a regra dos sifonados não estiver cumprida, o botão mantém-se
             // clicável apenas para apresentar a carta de aviso ao centro do ecrã.
@@ -5303,10 +5415,12 @@
                 corpo += `Tanques sifonados: ${listaTanquesSifonados}${produtosSifonados ? ` (${produtosSifonados})` : ''}\n`;
             }
             if (nomeGestorQueAutorizou) {
-                corpo += `NOTA: A descarga ficou acima de 90% com autorização de "${nomeGestorQueAutorizou}".\n`;
+                const listaAutorizados = formatarListaTanques(tanquesAutorizadosPeloGestor);
+                corpo += `AUTORIZAÇÃO DO GESTOR: ${listaAutorizados || 'Descarga'} acima de 90%, autorizada por "${nomeGestorQueAutorizou}".\n`;
             }
             if (nomePessoaQueInformouCargaNaoCabe) {
-                corpo += `DESCARGA NÃO AUTORIZADA: A carga não cabe. Informação dada por "${nomePessoaQueInformouCargaNaoCabe}".\n`;
+                const listaNaoCabem = formatarListaTanques(tanquesQueNaoCabem);
+                corpo += `DESCARGA NÃO AUTORIZADA: A carga não cabe em ${listaNaoCabem || 'um ou mais tanques'}. Informação dada por "${nomePessoaQueInformouCargaNaoCabe}".\n`;
             }
             corpo += `\n--- DETALHES DOS TANQUES ---\n\n`;
 
