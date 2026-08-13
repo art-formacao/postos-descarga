@@ -2114,7 +2114,7 @@
 
         .posto-confirmado-card {
             display: grid;
-            grid-template-columns: minmax(180px, 0.9fr) minmax(280px, 2.4fr);
+            grid-template-columns: minmax(0, 1fr) minmax(280px, auto) minmax(0, 1fr);
             align-items: center;
             gap: 12px;
             padding: 10px 12px;
@@ -2172,7 +2172,7 @@
 
         @media (max-width: 700px) {
             .posto-confirmado-card {
-                grid-template-columns: minmax(112px, 0.9fr) minmax(130px, 1.5fr);
+                grid-template-columns: minmax(0, 1fr) minmax(130px, auto) minmax(0, 1fr);
                 gap: 8px;
                 padding: 9px 8px;
             }
