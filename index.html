@@ -1348,7 +1348,8 @@
         }
 
         /* Campo de autorização: maior e mais legível sem alterar os restantes inputs. */
-        #nomeGestorAutorizacao.gestor-autorizacao-input {
+        #nomeGestorAutorizacao.gestor-autorizacao-input,
+        #nomePessoaDescargaNaoAutorizada.gestor-autorizacao-input {
             min-height: 58px;
             padding: 14px 16px;
             background-color: #ffffff;
@@ -1362,13 +1363,15 @@
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
         }
 
-        #nomeGestorAutorizacao.gestor-autorizacao-input::placeholder {
+        #nomeGestorAutorizacao.gestor-autorizacao-input::placeholder,
+        #nomePessoaDescargaNaoAutorizada.gestor-autorizacao-input::placeholder {
             color: #59636e;
             opacity: 1;
             font-weight: 500;
         }
 
-        #nomeGestorAutorizacao.gestor-autorizacao-input:focus {
+        #nomeGestorAutorizacao.gestor-autorizacao-input:focus,
+        #nomePessoaDescargaNaoAutorizada.gestor-autorizacao-input:focus {
             border-color: #005a9c;
             outline: 3px solid rgba(0, 99, 168, 0.28);
             outline-offset: 1px;
@@ -1376,7 +1379,8 @@
         }
 
         @media (max-width: 600px) {
-            #nomeGestorAutorizacao.gestor-autorizacao-input {
+            #nomeGestorAutorizacao.gestor-autorizacao-input,
+            #nomePessoaDescargaNaoAutorizada.gestor-autorizacao-input {
                 min-height: 60px;
                 padding: 14px;
                 font-size: 1.15rem;
@@ -2414,6 +2418,18 @@
         </div>
     </div>
 
+    <!-- MODAL: DESCARGA NÃO AUTORIZADA ACIMA DO LIMITE -->
+    <div id="modalDescargaNaoAutorizada" class="modal-overlay" style="z-index: 1250;" role="dialog" aria-modal="true" aria-labelledby="tituloDescargaNaoAutorizada">
+        <div class="modal-card" style="max-width: 360px; text-align: center; border-radius: 20px;">
+            <div style="font-size: 1.8rem; margin-bottom: 6px;">⚠️</div>
+            <div id="tituloDescargaNaoAutorizada" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Descarga não autorizada</div>
+            <div id="textoDescargaNaoAutorizada" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">A carga não cabe. Indique o nome da pessoa que informou.</div>
+            <input type="text" id="nomePessoaDescargaNaoAutorizada" class="gestor-autorizacao-input" autocomplete="name" placeholder="Nome da pessoa" aria-label="Nome da pessoa que informou que a carga não cabe" style="width: 100%; margin-bottom: 10px;">
+            <button type="button" class="btn-save-modal" style="margin-top: 0;" onclick="confirmarDescargaNaoAutorizada()">Confirmar e finalizar</button>
+            <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="cancelarDescargaNaoAutorizada()">Cancelar</button>
+        </div>
+    </div>
+
     <!-- MODAL: TICKET DE SONDAGEM -->
     <div id="modalTicketSondagem" class="modal-overlay" style="z-index: 1200;">
         <div class="modal-card" style="max-width: 340px; text-align: center; border-radius: 20px;">
@@ -2626,6 +2642,7 @@
         let fotoTicketSondagem = '';
         let fotoTicketTemporaria = '';
         let nomeGestorQueAutorizou = '';
+        let nomePessoaQueInformouCargaNaoCabe = '';
 
         document.addEventListener('keydown', (evento) => {
             if (evento.key === 'Escape' && document.getElementById('modalConfirmarVoltarTanques').classList.contains('active')) {
@@ -4510,6 +4527,8 @@
                 return { valido: false, tanque: 0, motivo: 'incompleto' };
             }
 
+            let primeiroExcesso = null;
+
             for (let i = 1; i <= totalTanques; i++) {
                 const produto = document.getElementById(`combustivel_${i}`);
                 const capacidade = document.getElementById(`capTotal_${i}`);
@@ -4542,10 +4561,12 @@
                 const volFinal = volAtual + volDescarga;
                 const percentualFinal = (volFinal / capTotal) * 100;
                 const companhiaBP = redeSelecionada.trim().toUpperCase() === 'BP';
-                const limitePercentual = companhiaBP ? 95 : 100;
+                const limitePercentual = companhiaBP
+                    ? (tanqueEstaSifonado(i) ? 80 : 95)
+                    : 100;
 
-                if (percentualFinal > limitePercentual) {
-                    return {
+                if (percentualFinal > limitePercentual && !primeiroExcesso) {
+                    primeiroExcesso = {
                         valido: false,
                         tanque: i,
                         motivo: 'excede-limite',
@@ -4556,7 +4577,7 @@
                 }
             }
 
-            return { valido: true };
+            return primeiroExcesso || { valido: true };
         }
 
         function obterTanquesQueRequeremAutorizacaoGestor() {
@@ -4608,6 +4629,33 @@
             document.getElementById('modalAutorizacaoGestor').classList.remove('active');
         }
 
+        function abrirDescargaNaoAutorizada(estado) {
+            const campoNome = document.getElementById('nomePessoaDescargaNaoAutorizada');
+            const texto = document.getElementById('textoDescargaNaoAutorizada');
+            campoNome.value = '';
+            texto.textContent = `A carga não cabe: o tanque ${estado.tanque} fica com ${formatarPercentagem(estado.percentual)}%, acima do limite autorizado de ${estado.limite}%. Indique o nome da pessoa que informou.`;
+            document.getElementById('modalDescargaNaoAutorizada').classList.add('active');
+            setTimeout(() => campoNome.focus(), 0);
+        }
+
+        function confirmarDescargaNaoAutorizada() {
+            const campoNome = document.getElementById('nomePessoaDescargaNaoAutorizada');
+            const nome = campoNome.value.trim().replace(/\s+/g, ' ');
+            if (!nome) {
+                alert('Indique o nome da pessoa que informou que a carga não cabe.');
+                campoNome.focus();
+                return;
+            }
+
+            nomePessoaQueInformouCargaNaoCabe = nome;
+            document.getElementById('modalDescargaNaoAutorizada').classList.remove('active');
+            document.getElementById('modalTicketSondagem').classList.add('active');
+        }
+
+        function cancelarDescargaNaoAutorizada() {
+            document.getElementById('modalDescargaNaoAutorizada').classList.remove('active');
+        }
+
         function iniciarFinalizacaoDescarga() {
             const erroSifonagem = obterErroValidacaoSifonagem();
             if (erroSifonagem) {
@@ -4616,11 +4664,8 @@
             }
 
             const estado = obterEstadoValidacaoTanques();
-            if (!estado.valido) {
-                if (estado.motivo === 'excede-limite') {
-                    const nomeCompanhia = estado.companhia === 'BP' ? 'Na companhia BP' : 'Nesta companhia';
-                    alert(`${nomeCompanhia}, não é possível finalizar: a ocupação final do tanque ${estado.tanque} é ${formatarPercentagem(estado.percentual)}% e excede o limite de ${estado.limite}%.`);
-                } else if (estado.motivo === 'valores-invalidos') {
+            if (!estado.valido && estado.motivo !== 'excede-limite') {
+                if (estado.motivo === 'valores-invalidos') {
                     alert(`Introduza valores válidos no tanque ${estado.tanque}. A capacidade e a descarga devem ser superiores a zero.`);
                 } else {
                     alert(`Preencha e confirme todos os dados do tanque ${estado.tanque || 1} antes de finalizar.`);
@@ -4629,8 +4674,13 @@
                 return;
             }
 
-            // Limpa uma autorização anterior antes de iniciar uma nova finalização.
+            // Limpa os nomes anteriores antes de iniciar uma nova finalização.
             nomeGestorQueAutorizou = '';
+            nomePessoaQueInformouCargaNaoCabe = '';
+            if (!estado.valido && estado.motivo === 'excede-limite') {
+                abrirDescargaNaoAutorizada(estado);
+                return;
+            }
             if (obterTanquesQueRequeremAutorizacaoGestor().length > 0) {
                 abrirPerguntaAutorizacaoGestor();
                 return;
@@ -4934,14 +4984,14 @@
                 return;
             }
 
-            // Se o limite for excedido, mantém o botão clicável apenas para mostrar
-            // o aviso com OK; a função de finalização continua bloqueada.
+            // Se o limite for excedido, mantém o botão clicável para pedir o nome
+            // de quem informou que a carga não cabe e permitir a finalização.
             botao.disabled = !estado.valido && estado.motivo !== 'excede-limite';
 
             if (estado.valido) {
                 botao.title = 'Finalizar descarga';
             } else if (estado.motivo === 'excede-limite') {
-                botao.title = `O tanque ${estado.tanque} excede o limite de ${estado.limite}% e não pode ser finalizado.`;
+                botao.title = `O tanque ${estado.tanque} excede o limite de ${estado.limite}%. Será pedida confirmação antes de finalizar.`;
             } else {
                 botao.title = 'Preencha e confirme todos os dados dos tanques.';
             }
@@ -5254,6 +5304,9 @@
             }
             if (nomeGestorQueAutorizou) {
                 corpo += `NOTA: A descarga ficou acima de 90% com autorização de "${nomeGestorQueAutorizou}".\n`;
+            }
+            if (nomePessoaQueInformouCargaNaoCabe) {
+                corpo += `DESCARGA NÃO AUTORIZADA: A carga não cabe. Informação dada por "${nomePessoaQueInformouCargaNaoCabe}".\n`;
             }
             corpo += `\n--- DETALHES DOS TANQUES ---\n\n`;
 
