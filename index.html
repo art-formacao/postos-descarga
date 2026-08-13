@@ -2320,6 +2320,16 @@
         <footer class="app-footer">Desenvolvido por Artiom Fedco (TJA - Dep. Formação, 2026)</footer>
     </div>
 
+    <!-- CARTA CENTRAL GENÉRICA PARA TODOS OS AVISOS -->
+    <div id="modalAvisoCentral" class="modal-overlay" style="z-index: 2000;" role="alertdialog" aria-modal="true" aria-labelledby="tituloAvisoCentral" aria-describedby="textoAvisoCentral" onclick="fecharAvisoCentralAoFundo(event)">
+        <div class="modal-card" style="max-width: 380px; text-align: center; border-radius: 20px;">
+            <div style="font-size: 1.8rem; margin-bottom: 6px;">⚠️</div>
+            <div id="tituloAvisoCentral" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 10px;">Atenção</div>
+            <div id="textoAvisoCentral" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.45; white-space: pre-line;"></div>
+            <button type="button" id="btnFecharAvisoCentral" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="fecharAvisoCentral()">OK</button>
+        </div>
+    </div>
+
     <!-- AVISO ANTES DE ABRIR O GOOGLE MAPS OU WAZE -->
     <div id="modalAvisoNavegacao" class="modal-overlay" style="z-index: 1400;" role="alertdialog" aria-modal="true" aria-labelledby="tituloAvisoNavegacao" aria-describedby="textoAvisoNavegacao" onclick="fecharAvisoNavegacaoAoFundo(event)">
         <div class="modal-card" style="max-width: 380px; text-align: center; border-radius: 20px;">
@@ -2646,8 +2656,39 @@
         let nomePessoaQueInformouCargaNaoCabe = '';
         let tanquesAutorizadosPeloGestor = [];
         let tanquesQueNaoCabem = [];
+        let elementoFocadoAntesDoAvisoCentral = null;
+
+        function mostrarAvisoCentral(mensagem, titulo = 'Atenção') {
+            const modal = document.getElementById('modalAvisoCentral');
+            const tituloEl = document.getElementById('tituloAvisoCentral');
+            const textoEl = document.getElementById('textoAvisoCentral');
+            if (!modal || !tituloEl || !textoEl) return;
+
+            elementoFocadoAntesDoAvisoCentral = document.activeElement;
+            tituloEl.textContent = titulo;
+            textoEl.textContent = String(mensagem || '');
+            modal.classList.add('active');
+            requestAnimationFrame(() => document.getElementById('btnFecharAvisoCentral')?.focus());
+        }
+
+        function fecharAvisoCentral() {
+            const modal = document.getElementById('modalAvisoCentral');
+            if (modal) modal.classList.remove('active');
+            if (elementoFocadoAntesDoAvisoCentral && typeof elementoFocadoAntesDoAvisoCentral.focus === 'function') {
+                elementoFocadoAntesDoAvisoCentral.focus();
+            }
+            elementoFocadoAntesDoAvisoCentral = null;
+        }
+
+        function fecharAvisoCentralAoFundo(evento) {
+            if (evento.target === evento.currentTarget) fecharAvisoCentral();
+        }
 
         document.addEventListener('keydown', (evento) => {
+            if (evento.key === 'Escape' && document.getElementById('modalAvisoCentral')?.classList.contains('active')) {
+                fecharAvisoCentral();
+                return;
+            }
             if (evento.key === 'Escape' && document.getElementById('modalConfirmarVoltarTanques').classList.contains('active')) {
                 fecharConfirmacaoVoltarTanques();
             }
@@ -2777,7 +2818,7 @@
                 console.error('Não foi possível carregar o índice das pastas:', erro);
                 localStorage.setItem('todas_companhias_app', '[]');
                 localStorage.setItem('todos_postos_app', '[]');
-                setTimeout(() => alert(
+                setTimeout(() => mostrarAvisoCentral(
                     'Não foi possível ler clientes_postos_fotos/manifest.json. ' +
                     'No Netlify, confirme que a publicação terminou corretamente.'
                 ), 50);
@@ -2990,7 +3031,7 @@
                 sincronizarNuvemGoogle('postos', postos);
                 return true;
             } catch (e) {
-                alert("Erro ao guardar: As fotos carregadas excedem a memória disponível do navegador. Tente carregar fotos mais leves.");
+                mostrarAvisoCentral("Erro ao guardar: As fotos carregadas excedem a memória disponível do navegador. Tente carregar fotos mais leves.");
                 return false;
             }
         }
@@ -3439,7 +3480,7 @@
             const config = obterProdutosCompanhias();
             const lista = obterListaProdutosEmEdicao(config);
             if (lista.some(item => item.toLowerCase() === produto.toLowerCase())) {
-                alert('Esse produto já existe nesta lista.');
+                mostrarAvisoCentral('Esse produto já existe nesta lista.');
                 return;
             }
             lista.push(produto);
@@ -3535,7 +3576,7 @@
                 event.target.value = "";
             };
             leitor.onerror = function() {
-                alert('Não foi possível ler a imagem selecionada.');
+                mostrarAvisoCentral('Não foi possível ler a imagem selecionada.');
                 event.target.value = "";
             };
             leitor.readAsDataURL(ficheiro);
@@ -3575,7 +3616,7 @@
             const obs = document.getElementById('modalObs').value.trim();
 
             if (!nome) {
-                alert("Por favor, introduza o nome do posto.");
+                mostrarAvisoCentral("Por favor, introduza o nome do posto.");
                 return;
             }
 
@@ -4646,7 +4687,7 @@
             const campoNome = document.getElementById('nomeGestorAutorizacao');
             const nome = campoNome.value.trim().replace(/\s+/g, ' ');
             if (!nome) {
-                alert('Indique o nome do gestor que autorizou a descarga.');
+                mostrarAvisoCentral('Indique o nome do gestor que autorizou a descarga.');
                 campoNome.focus();
                 return;
             }
@@ -4674,7 +4715,7 @@
             const campoNome = document.getElementById('nomePessoaDescargaNaoAutorizada');
             const nome = campoNome.value.trim().replace(/\s+/g, ' ');
             if (!nome) {
-                alert('Indique o nome da pessoa que informou que a carga não cabe.');
+                mostrarAvisoCentral('Indique o nome da pessoa que informou que a carga não cabe.');
                 campoNome.focus();
                 return;
             }
@@ -4695,7 +4736,7 @@
         function iniciarFinalizacaoDescarga() {
             const erroProdutos = obterErroRegraQuantidadeProdutos();
             if (erroProdutos) {
-                alert(erroProdutos);
+                mostrarAvisoCentral(erroProdutos);
                 atualizarAvisoRegraProdutos();
                 return;
             }
@@ -4709,9 +4750,9 @@
             const estado = obterEstadoValidacaoTanques();
             if (!estado.valido && estado.motivo !== 'excede-limite') {
                 if (estado.motivo === 'valores-invalidos') {
-                    alert(`Introduza valores válidos no tanque ${estado.tanque}. A capacidade e a descarga devem ser superiores a zero.`);
+                    mostrarAvisoCentral(`Introduza valores válidos no tanque ${estado.tanque}. A capacidade e a descarga devem ser superiores a zero.`);
                 } else {
-                    alert(`Preencha e confirme todos os dados do tanque ${estado.tanque || 1} antes de finalizar.`);
+                    mostrarAvisoCentral(`Preencha e confirme todos os dados do tanque ${estado.tanque || 1} antes de finalizar.`);
                 }
                 atualizarBotaoFinalizar();
                 return;
@@ -4776,7 +4817,7 @@
         function pedirConfirmacaoValor(idInput, tipoCampo, indexTanque) {
             const val = document.getElementById(idInput).value.trim();
             if (!val || isNaN(val)) {
-                alert("Por favor, introduza um valor válido em litros.");
+                mostrarAvisoCentral("Por favor, introduza um valor válido em litros.");
                 return;
             }
             campoAConfirmarId = { id: idInput, index: indexTanque };
@@ -4909,14 +4950,14 @@
             if (faltamEspacosParaProdutosDistintos) {
                 select.value = anterior;
                 valor = select.value;
-                alert(`Selecionou ${totalProdutos} produtos. Escolha um produto diferente neste tanque para garantir ${totalProdutos} tipos de produto diferentes na descarga.`);
+                mostrarAvisoCentral(`Selecionou ${totalProdutos} produtos. Escolha um produto diferente neste tanque para garantir ${totalProdutos} tipos de produto diferentes na descarga.`);
             } else if (valor && obterProdutosDistintosSelecionados().length > totalProdutos) {
                 select.value = anterior;
                 valor = select.value;
                 const textoLimite = totalProdutos === 1
                     ? 'Selecionou 1 produto. Todos os tanques têm de ter o mesmo produto.'
                     : `Selecionou ${totalProdutos} produtos. Só pode indicar ${totalProdutos} tipos de produto diferentes nos tanques.`;
-                alert(textoLimite);
+                mostrarAvisoCentral(textoLimite);
             }
             select.dataset.valorAnterior = valor;
 
@@ -5048,7 +5089,7 @@
             if (ativo && iguais.length < 2) {
                 if (seletor) seletor.checked = false;
                 tanquesSifonados.delete(index);
-                alert('O seletor de sifonagem só pode ser usado em tanques com o mesmo produto.');
+                mostrarAvisoCentral('O seletor de sifonagem só pode ser usado em tanques com o mesmo produto.');
                 return;
             }
 
@@ -5335,10 +5376,10 @@
         async function exportarVersaoAtual() {
             try {
                 descarregarHtmlExportado(await gerarHtmlExportacao(false));
-                alert('Versão atual exportada. O ficheiro index.html inclui os postos, observações, fotos, logótipos e o menu de gestão atuais.');
+                mostrarAvisoCentral('Versão atual exportada. O ficheiro index.html inclui os postos, observações, fotos, logótipos e o menu de gestão atuais.');
             } catch (erro) {
                 console.error('Erro ao exportar a versão atual:', erro);
-                alert('Não foi possível exportar a versão atual. Tente novamente.');
+                mostrarAvisoCentral('Não foi possível exportar a versão atual. Tente novamente.');
             }
         }
 
@@ -5346,10 +5387,10 @@
         async function exportarAplicacaoAtual() {
             try {
                 descarregarHtmlExportado(await gerarHtmlExportacao(true));
-                alert('Versão exportada. O ficheiro index.html já inclui os postos, observações, fotos e logótipo atuais, sem o menu de gestão. Publique-o no Netlify.');
+                mostrarAvisoCentral('Versão exportada. O ficheiro index.html já inclui os postos, observações, fotos e logótipo atuais, sem o menu de gestão. Publique-o no Netlify.');
             } catch (erro) {
                 console.error('Erro ao exportar a aplicação:', erro);
-                alert('Não foi possível exportar a aplicação. Tente novamente.');
+                mostrarAvisoCentral('Não foi possível exportar a aplicação. Tente novamente.');
             }
         }
 
@@ -5575,7 +5616,7 @@ logoutButton.addEventListener("click", async () => {
         mostrarLogin(true);
     } catch (error) {
         console.error("Erro ao terminar sessão:", error);
-        window.alert("Não foi possível terminar a sessão. Tente novamente.");
+        mostrarAvisoCentral("Não foi possível terminar a sessão. Tente novamente.");
     } finally {
         logoutButton.disabled = false;
         logoutButton.querySelector("span").textContent = "Sair";
