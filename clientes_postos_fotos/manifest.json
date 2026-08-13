@@ -1,5 +1,5 @@
 {
-  "geradoEm": "2026-08-10T11:29:35.705675Z",
+  "geradoEm": "2026-08-13T08:51:08.509158Z",
   "companhias": [
     {
       "nome": "BP",
@@ -44,10 +44,11 @@
       "companhia": "BP",
       "nome": "A1 Mealhada (Este) B E REPA",
       "gps": "40.3331, -8.4936",
-      "obs": "posto sul norte",
+      "obs": "Descarga a entrada do posto, de frente para posto",
       "fotos": [
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/3.jpg",
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/40.3331%2C%20-8.4936.jpg",
+        "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/Descarga%20a%20entrada%20do%20posto%2C%20de%20frente%20para%20posto.jpg",
         "./clientes_postos_fotos/BP/A1%20Mealhada%20%28Este%29%20B%20E%20REPA/posto%20sul%20norte.jpg"
       ]
     },
