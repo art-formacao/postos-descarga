@@ -2152,8 +2152,24 @@
 
         .posto-gps-side {
             display: flex;
-            justify-content: flex-start;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 6px;
             min-width: 0;
+        }
+
+        .posto-gps-distance {
+            font-size: 0.78rem;
+            line-height: 1.25;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .posto-recalc-button {
+            width: 100%;
+            max-width: 190px;
+            padding: 7px 9px;
         }
 
         .posto-gps-message {
@@ -2180,6 +2196,16 @@
             .posto-gps-message {
                 font-size: 0.69rem;
                 overflow-wrap: anywhere;
+            }
+
+            .posto-gps-distance {
+                font-size: 0.67rem;
+            }
+
+            .posto-recalc-button {
+                max-width: none;
+                white-space: normal;
+                font-size: 0.68rem;
             }
 
             #infoPostoConfirmado {
@@ -2317,7 +2343,7 @@
                         <div class="profile-title">
                             <span>⛽ Perfil do Posto</span>
                             <div class="gps-profile-highlight" role="status" aria-live="polite">
-                                <span class="gps-location-badge checking" data-gps-location-status>📍 A verificar localização...</span>
+                                <span class="gps-location-badge checking" data-gps-location-status>📍 Prima CONFIRMO para verificar</span>
                             </div>
                         </div>
 
@@ -2326,13 +2352,12 @@
                                 <section id="profileLocationRow" class="profile-detail-row profile-location-row">
                                     <label class="profile-location-heading">
                                         <span>Localização do Posto:</span>
-                                        <span id="gpsStatusTitle" class="gps-status-title gps-warn">A verificar localização...</span>
+                                        <span id="gpsStatusTitle" class="gps-status-title gps-warn">Aguardando confirmação...</span>
                                     </label>
                                     <div class="gps-distance-box">
                                         <div class="gps-info-text">
-                                            <span id="gpsDistVal" class="gps-dist-val">--</span>
+                                            <span id="gpsDistVal" class="gps-dist-val">Prima “CONFIRMO que estou no local correto” para calcular a distância.</span>
                                         </div>
-                                        <button type="button" class="btn-recalc-gps" onclick="calcularDistanciaAtualPosto()">🔄 Recalcular Posição</button>
                                     </div>
                                 </section>
 
@@ -2413,7 +2438,9 @@
                 <div class="question-title">Capacidade Total Tanques Cliente</div>
                 <div class="posto-confirmado-card" id="postoConfirmadoCard">
                     <div class="posto-gps-side" role="status" aria-live="polite">
-                        <span class="posto-gps-message checking" data-gps-card-status>A verificar...</span>
+                        <span class="posto-gps-message checking" data-gps-card-status>Aguardando confirmação...</span>
+                        <span class="posto-gps-distance" data-gps-card-distance>Distância ao posto: --</span>
+                        <button type="button" class="btn-recalc-gps posto-recalc-button" onclick="calcularDistanciaAtualPosto()">🔄 Recalcular posição</button>
                     </div>
                     <div id="infoPostoConfirmado"></div>
                 </div>
@@ -3077,9 +3104,8 @@
                 document.getElementById('headerTitle').innerText = "Verificação de Descarga";
             }
 
-            if ((passoAtual === 4 || passoAtual === 5) && postoSelecionadoAtual) {
-                setTimeout(calcularDistanciaAtualPosto, 0);
-            }
+            // A posição GPS só é atualizada pela confirmação no passo 4
+            // ou pelo botão "Recalcular posição" existente no passo 5.
 
             window.scrollTo(0, 0);
         }
@@ -3961,7 +3987,7 @@
                 const profileLocationRow = document.getElementById('profileLocationRow');
                 if (caixaGps && profileLocationRow) profileLocationRow.appendChild(caixaGps);
                 profileView.classList.add('active');
-                calcularDistanciaAtualPosto();
+                prepararLocalizacaoParaConfirmacao();
                 irParaPasso(4);
             }
 
@@ -4470,6 +4496,28 @@
             }
         }
 
+        function prepararLocalizacaoParaConfirmacao() {
+            const titleEl = document.getElementById('gpsStatusTitle');
+            const distEl = document.getElementById('gpsDistVal');
+            const cardDistEl = document.querySelector('[data-gps-card-distance]');
+            const confirmacao = document.getElementById('chkConfirmacao');
+
+            if (confirmacao) confirmacao.checked = false;
+            if (titleEl) {
+                titleEl.className = "gps-status-title gps-warn";
+                titleEl.innerText = "Aguardando confirmação...";
+            }
+            if (distEl) distEl.innerText = "Prima “CONFIRMO que estou no local correto” para calcular a distância.";
+            if (cardDistEl) cardDistEl.innerText = "Distância ao posto: --";
+            ultimaGeolocalizacao = 'Localização ainda não confirmada';
+            atualizarIndicadoresLocalizacao('checking', '📍 Prima CONFIRMO para verificar');
+        }
+
+        function atualizarDistanciaCarta(texto) {
+            const cardDistEl = document.querySelector('[data-gps-card-distance]');
+            if (cardDistEl) cardDistEl.innerText = texto;
+        }
+
         function calcularDistanciaAtualPosto() {
             if (verificacaoGpsEmCurso) {
                 repetirVerificacaoGps = true;
@@ -4483,11 +4531,13 @@
             titleEl.className = "gps-status-title gps-warn";
             titleEl.innerText = "📍 A obter sinal GPS...";
             distEl.innerText = "--";
+            atualizarDistanciaCarta("Distância ao posto: a calcular...");
             atualizarIndicadoresLocalizacao('checking', '📍 A verificar localização...');
 
             if (!postoSelecionadoAtual || !postoSelecionadoAtual.gps) {
                 titleEl.innerText = "⚠️ Posto sem coordenadas GPS";
                 distEl.innerText = "Adicione as coordenadas nas definições do posto.";
+                atualizarDistanciaCarta("Distância ao posto: indisponível");
                 ultimaGeolocalizacao = 'Posto sem coordenadas GPS';
                 atualizarIndicadoresLocalizacao('error', '⚠️ GPS do posto indisponível');
                 concluirVerificacaoGps();
@@ -4498,6 +4548,7 @@
             if (!coordsPosto) {
                 titleEl.innerText = "⚠️ Coordenadas inválidas";
                 distEl.innerText = "Formato exigido: Lat, Long (Ex: 40.7511, -8.5778)";
+                atualizarDistanciaCarta("Distância ao posto: indisponível");
                 ultimaGeolocalizacao = 'Coordenadas GPS do posto inválidas';
                 atualizarIndicadoresLocalizacao('error', '⚠️ GPS do posto inválido');
                 concluirVerificacaoGps();
@@ -4506,6 +4557,8 @@
 
             if (!navigator.geolocation) {
                 titleEl.innerText = "⚠️ GPS não suportado";
+                distEl.innerText = "Este dispositivo não permite obter a localização.";
+                atualizarDistanciaCarta("Distância ao posto: indisponível");
                 ultimaGeolocalizacao = 'GPS não suportado neste dispositivo';
                 atualizarIndicadoresLocalizacao('error', '⚠️ GPS não suportado');
                 concluirVerificacaoGps();
@@ -4521,6 +4574,7 @@
                     const textoDistancia = metros >= 1000
                         ? `${(metros / 1000).toFixed(2).replace('.', ',')} km`
                         : `${Math.round(metros)} metros`;
+                    atualizarDistanciaCarta(`Distância ao posto: ${textoDistancia}`);
 
                     if (metros <= 20) {
                         titleEl.className = "gps-status-title gps-ok";
@@ -4543,6 +4597,7 @@
                     titleEl.className = "gps-status-title gps-warn";
                     titleEl.innerText = "⚠️ Sem permissão de GPS";
                     distEl.innerText = "Ative a localização no telemóvel.";
+                    atualizarDistanciaCarta("Distância ao posto: não foi possível calcular");
                     ultimaGeolocalizacao = 'Não foi possível obter a posição geográfica';
                     atualizarIndicadoresLocalizacao('error', '⚠️ Não foi possível confirmar');
                     const pdfGps = document.getElementById('pdfGpsStatus');
@@ -4553,12 +4608,6 @@
             );
         }
 
-        // Nos passos de localização e tanques, cada toque/clique volta a pedir uma posição atual.
-        document.addEventListener('click', (evento) => {
-            if ((passoAtual === 4 || passoAtual === 5) && postoSelecionadoAtual && !evento.target.closest('.btn-recalc-gps')) {
-                calcularDistanciaAtualPosto();
-            }
-        }, true);
 
         function selecionarQtdProdutos(qtd, elemento) {
             totalProdutos = qtd;
@@ -4578,6 +4627,7 @@
         function mostrarPerguntaProdutos() {
             const confirmado = document.getElementById('chkConfirmacao').checked;
             document.getElementById('containerPerguntaProdutos').style.display = confirmado ? 'block' : 'none';
+            if (confirmado) calcularDistanciaAtualPosto();
             if (!confirmado) {
                 totalProdutos = 0;
                 totalTanques = 0;
