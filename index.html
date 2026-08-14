@@ -2374,6 +2374,26 @@
             }
         }
 
+
+        /* Títulos "Localização do Posto" e "Observações do Posto" idênticos. */
+        #step4 .profile-location-heading > span:first-child,
+        #step4 .profile-observation-heading {
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.25;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 600px) {
+            #step4 .profile-location-heading > span:first-child,
+            #step4 .profile-observation-heading {
+                font-size: 0.72rem;
+                font-weight: 400;
+                line-height: 1.15;
+            }
+        }
+
     </style>
 </head>
 <body>
