@@ -194,6 +194,45 @@
             color: var(--text-secondary);
             text-align: center;
             margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .gps-status-indicator {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .gps-status-indicator.checking {
+            color: #8a5a00;
+        }
+
+        .gps-status-indicator.inside {
+            color: #176b2c;
+        }
+
+        .gps-status-indicator.outside,
+        .gps-status-indicator.error {
+            color: #b42318;
+        }
+
+        .question-title.status-inside {
+            color: #176b2c;
+            background: rgba(23, 107, 44, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .question-title.status-outside,
+        .question-title.status-error {
+            color: #b42318;
+            background: rgba(180, 35, 24, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
         }
 
         /* Seletores em Grelha */
@@ -2104,45 +2143,9 @@
 
 
 
-        /* Estado GPS destacado e sincronizado nos passos 4 e 7. */
+        /* Estado GPS destacado e sincronizado nos passos 4, 5, 6 e 7. */
         .gps-profile-highlight {
-            display: flex;
-            justify-content: center;
-            margin-top: 8px;
-        }
-
-        .gps-location-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 42px;
-            padding: 9px 14px;
-            border: 2px solid currentColor;
-            border-radius: 999px;
-            font-size: 0.84rem;
-            line-height: 1.15;
-            font-weight: 800;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.25px;
-            background: #ffffff;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
-        }
-
-        .gps-location-badge.checking {
-            color: #8a5a00;
-            background: #fff7d6;
-        }
-
-        .gps-location-badge.inside {
-            color: #176b2c;
-            background: #e8f8ec;
-        }
-
-        .gps-location-badge.outside,
-        .gps-location-badge.error {
-            color: #b42318;
-            background: #fff0ef;
+            display: none;
         }
 
         .posto-confirmado-card {
@@ -2268,6 +2271,7 @@
                 font-size: 0.72rem;
                 font-weight: 600;
                 line-height: 1.15;
+                color: var(--text-primary);
             }
 
             #step4 .profile-location-heading .gps-status-title {
@@ -2399,17 +2403,18 @@
         #step4 .profile-detail-row.profile-observation-row > .profile-observation-heading {
             font-family: inherit;
             font-size: 1rem;
-            font-weight: 400;
+            font-weight: 600;
             line-height: 1.25;
-            color: var(--text-secondary);
+            color: var(--text-primary);
         }
 
         @media (max-width: 600px) {
             #step4 .profile-location-heading > span:first-child,
             #step4 .profile-detail-row.profile-observation-row > .profile-observation-heading {
                 font-size: 0.72rem;
-                font-weight: 400;
+                font-weight: 600;
                 line-height: 1.15;
+                color: var(--text-primary);
             }
         }
 
@@ -2535,16 +2540,13 @@
 
             <!-- PASSO 4: Localização do Posto -->
             <div id="step4" class="step">
-                <div class="question-title">Passo 4 • Localização do Posto</div>
+                <div class="question-title" id="questionTitleStep4">Passo 4 • Localização do Posto <span id="gpsStatusStep4" class="gps-status-indicator">📍 Prima CONFIRMO para verificar</span></div>
 
                 <div class="posto-card">
                     <!-- PERFIL DO POSTO -->
                     <div id="postoProfileView" class="posto-profile-view">
                         <div class="profile-title">
                             <span>⛽ Perfil do Posto</span>
-                            <div class="gps-profile-highlight" role="status" aria-live="polite">
-                                <span class="gps-location-badge checking" data-gps-location-status>📍 Prima CONFIRMO para verificar</span>
-                            </div>
                         </div>
 
                         <div class="profile-main-grid">
@@ -2607,7 +2609,7 @@
 
             <!-- PASSO 5: Produtos -->
             <div id="step5" class="step">
-                <div class="question-title">Passo 5 • Produtos</div>
+                <div class="question-title" id="questionTitleStep5">Passo 5 • Produtos <span id="gpsStatusStep5" class="gps-status-indicator">📍 A verificar...</span></div>
 
                 <div class="posto-card">
                     <div>
@@ -2631,7 +2633,7 @@
 
             <!-- PASSO 6: Tanques -->
             <div id="step6" class="step">
-                <div class="question-title">Passo 6 • Tanques</div>
+                <div class="question-title" id="questionTitleStep6">Passo 6 • Tanques <span id="gpsStatusStep6" class="gps-status-indicator">📍 A verificar...</span></div>
 
                 <div class="posto-card">
                     <div>
@@ -3328,8 +3330,10 @@
                 document.getElementById('headerTitle').innerText = "Verificação de Descarga";
             }
 
-            // O GPS é verificado ao entrar no Perfil do Posto após a seleção,
-            // novamente ao confirmar o local e pelo botão do passo 5.
+            // Recalcular posição ao avançar para os passos 4, 5, 6 e 7
+            if ([4, 5, 6, 7].includes(numeroPasso) && postoSelecionadoAtual) {
+                setTimeout(calcularDistanciaAtualPosto, 100);
+            }
 
             window.scrollTo(0, 0);
         }
@@ -4691,10 +4695,11 @@
 
         function atualizarIndicadoresLocalizacao(estado, texto) {
             estadoVisualGps = { estado, texto };
-            document.querySelectorAll('[data-gps-location-status]').forEach(el => {
-                el.className = `gps-location-badge ${estado}`;
-                el.textContent = texto;
-            });
+            
+            // Atualizar indicadores nos passos 4, 5 e 6
+            atualizarIndicadorGpsPasso(estado, texto, 4);
+            atualizarIndicadorGpsPasso(estado, texto, 5);
+            atualizarIndicadorGpsPasso(estado, texto, 6);
 
             const card = document.getElementById('postoConfirmadoCard');
             const mensagemCard = document.querySelector('[data-gps-card-status]');
@@ -4716,7 +4721,7 @@
 
         function concluirVerificacaoGps() {
             verificacaoGpsEmCurso = false;
-            if (repetirVerificacaoGps && (passoAtual === 4 || passoAtual === 7) && postoSelecionadoAtual) {
+            if (repetirVerificacaoGps && (passoAtual === 4 || passoAtual === 5 || passoAtual === 6 || passoAtual === 7) && postoSelecionadoAtual) {
                 repetirVerificacaoGps = false;
                 setTimeout(calcularDistanciaAtualPosto, 100);
             }
@@ -4842,6 +4847,30 @@
             if (chk) calcularDistanciaAtualPosto();
         }
 
+        function atualizarIndicadorGpsPasso(estado, texto, passoNum) {
+            const titleElement = document.getElementById(`questionTitleStep${passoNum}`);
+            const statusElement = document.getElementById(`gpsStatusStep${passoNum}`);
+            
+            if (!titleElement || !statusElement) return;
+
+            // Remove todas as classes de status
+            titleElement.classList.remove('status-inside', 'status-outside', 'status-error');
+            statusElement.classList.remove('checking', 'inside', 'outside', 'error');
+
+            // Adiciona as classes apropriadas
+            if (estado === 'inside') {
+                titleElement.classList.add('status-inside');
+                statusElement.classList.add('inside');
+            } else if (estado === 'outside' || estado === 'error') {
+                titleElement.classList.add(estado === 'outside' ? 'status-outside' : 'status-error');
+                statusElement.classList.add(estado);
+            } else {
+                statusElement.classList.add('checking');
+            }
+
+            statusElement.textContent = texto;
+        }
+
         function selecionarQtdProdutos(qtd, elemento) {
             totalProdutos = qtd;
             document.querySelectorAll('.btn-produto').forEach(btn => btn.classList.remove('selected'));
@@ -4942,6 +4971,9 @@
             } else pdfFotoContainer.style.display = 'none';
 
             pdfExtra.style.display = temExtra ? 'block' : 'none';
+            
+            // Recalcular posição ao entrar no passo 7
+            setTimeout(calcularDistanciaAtualPosto, 100);
             
             gerarFormularioTanques();
             irParaPasso(7);
