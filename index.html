@@ -1268,29 +1268,29 @@
             min-width: 0;
         }
 
-        /* Passo 5: as quatro linhas de cada tanque ficam maiores e mais legíveis. */
-        #step5 .tank-controls-container {
+        /* Passo 7: as quatro linhas de cada tanque ficam maiores e mais legíveis. */
+        #step7 .tank-controls-container {
             gap: 10px;
         }
 
-        #step5 .tank-controls-container .input-row-single > label {
+        #step7 .tank-controls-container .input-row-single > label {
             font-size: 0.95rem;
             margin-bottom: 7px;
         }
 
-        #step5 .tank-controls-container select,
-        #step5 .tank-controls-container input[type="number"] {
+        #step7 .tank-controls-container select,
+        #step7 .tank-controls-container input[type="number"] {
             min-height: 52px;
             padding: 12px 14px;
             font-size: 1.05rem;
             font-weight: 650;
         }
 
-        #step5 .input-with-ok {
+        #step7 .input-with-ok {
             gap: 8px;
         }
 
-        #step5 .btn-ok-inline {
+        #step7 .btn-ok-inline {
             min-width: 54px;
             height: 52px;
             padding: 10px 14px;
@@ -1818,8 +1818,6 @@
 
         #step4 .profile-title,
         #step4 #containerObsView,
-        #step4 #containerPerguntaProdutos,
-        #step4 #containerPerguntaTanques,
         #step4 .gps-distance-box,
         #step4 .checkbox-container,
         #step4 .nav-buttons {
@@ -1868,9 +1866,7 @@
 
         /* Perfil do posto: áreas mais altas e fáceis de tocar.
            Google Maps e Waze mantêm exatamente as dimensões existentes. */
-        #step4 #containerObsView > label,
-        #step4 #containerPerguntaProdutos > label,
-        #step4 #containerPerguntaTanques > label {
+        #step4 #containerObsView > label {
             font-size: 1rem;
             line-height: 1.35;
             font-weight: 600;
@@ -1893,18 +1889,6 @@
             font-weight: 400;
         }
 
-        #step4 #containerPerguntaProdutos .grid-selector,
-        #step4 #containerPerguntaTanques .grid-selector {
-            gap: 12px 10px;
-        }
-
-        #step4 #containerPerguntaProdutos .btn-option,
-        #step4 #containerPerguntaTanques .btn-option {
-            min-height: 60px;
-            padding: 16px 12px;
-            font-size: 1rem;
-        }
-
         #step4 .gps-distance-box {
             min-height: 70px;
             padding: 14px;
@@ -1913,6 +1897,14 @@
         #step4 .btn-recalc-gps {
             min-height: 46px;
             padding: 10px 14px;
+        }
+
+        /* Passo 5 e 6: botões de seleção */
+        #step5 .posto-card > div > label,
+        #step6 .posto-card > div > label {
+            font-size: 1rem;
+            line-height: 1.35;
+            font-weight: 600;
         }
 
         #step4 .checkbox-container {
@@ -1931,11 +1923,38 @@
             line-height: 1.35;
         }
 
-        #step4 #btnAvancarTanques {
+        #step4 #btnAvancarPasso4 {
             min-height: 66px;
             padding: 17px 20px;
             font-size: 1.08rem;
             font-weight: 700;
+        }
+
+        /* Passo 5: Produtos */
+        #step5 .grid-selector {
+            gap: 12px 10px;
+        }
+
+        #step5 .btn-option {
+            min-height: 60px;
+            padding: 16px 12px;
+            font-size: 1rem;
+        }
+
+        /* Passo 6: Tanques */
+        #step6 .grid-selector {
+            gap: 12px 10px;
+        }
+
+        #step6 .btn-option {
+            min-height: 60px;
+            padding: 16px 12px;
+            font-size: 1rem;
+        }
+
+        /* Passo 7: Produtos & Sondagem - manter o layout original do tanque */
+        #step7 .posto-card {
+            padding: 14px;
         }
 
 
@@ -2085,7 +2104,7 @@
 
 
 
-        /* Estado GPS destacado e sincronizado nos passos 4 e 5. */
+        /* Estado GPS destacado e sincronizado nos passos 4 e 7. */
         .gps-profile-highlight {
             display: flex;
             justify-content: center;
@@ -2141,7 +2160,7 @@
             transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
         }
 
-        /* No passo 5, toda a carta mostra o resultado da validação GPS. */
+        /* No passo 7, toda a carta mostra o resultado da validação GPS. */
         .posto-confirmado-card.gps-inside {
             border-color: #218838;
             background: #dff3e4;
@@ -2312,19 +2331,19 @@
 
             /* Capacidade dos tanques: mantém estado, distância, botão e posto
                em colunas horizontais, como no tablet. */
-            #step5 .posto-confirmado-card {
+            #step7 .posto-confirmado-card {
                 grid-template-columns: 108px minmax(0, 1fr);
                 gap: 8px;
                 align-items: center;
                 padding: 9px 8px;
             }
 
-            #step5 .posto-gps-side {
+            #step7 .posto-gps-side {
                 width: 100%;
                 align-items: stretch;
             }
 
-            #step5 .posto-gps-message {
+            #step7 .posto-gps-message {
                 font-size: 0.64rem;
                 line-height: 1.15;
                 overflow-wrap: normal;
@@ -2332,14 +2351,14 @@
                 hyphens: none;
             }
 
-            #step5 .posto-gps-distance {
+            #step7 .posto-gps-distance {
                 font-size: 0.62rem;
                 line-height: 1.2;
                 overflow-wrap: normal;
                 word-break: normal;
             }
 
-            #step5 .posto-recalc-button {
+            #step7 .posto-recalc-button {
                 width: 100%;
                 min-height: 32px;
                 padding: 5px 4px;
@@ -2348,7 +2367,7 @@
                 white-space: normal;
             }
 
-            #step5 #infoPostoConfirmado {
+            #step7 #infoPostoConfirmado {
                 width: 100%;
                 font-size: 0.68rem;
                 line-height: 1.32;
@@ -2358,18 +2377,18 @@
         }
 
         @media (max-width: 360px) {
-            #step5 .posto-confirmado-card {
+            #step7 .posto-confirmado-card {
                 grid-template-columns: 98px minmax(0, 1fr);
                 gap: 6px;
             }
 
-            #step5 .posto-gps-message,
-            #step5 .posto-recalc-button {
+            #step7 .posto-gps-message,
+            #step7 .posto-recalc-button {
                 font-size: 0.58rem;
             }
 
-            #step5 .posto-gps-distance,
-            #step5 #infoPostoConfirmado {
+            #step7 .posto-gps-distance,
+            #step7 #infoPostoConfirmado {
                 font-size: 0.6rem;
             }
         }
@@ -2514,9 +2533,9 @@
                 </div>
             </div>
 
-            <!-- PASSO 4: Localização e Tanques -->
+            <!-- PASSO 4: Localização do Posto -->
             <div id="step4" class="step">
-                <div class="question-title">Passo 4 • Localização &amp; Tanques</div>
+                <div class="question-title">Passo 4 • Localização do Posto</div>
 
                 <div class="posto-card">
                     <!-- PERFIL DO POSTO -->
@@ -2572,40 +2591,12 @@
                         </div>
 
                         <label class="checkbox-container">
-                            <input type="checkbox" id="chkConfirmacao" onchange="mostrarPerguntaProdutos()">
+                            <input type="checkbox" id="chkConfirmacao" onchange="validarContinuacaoPasso4()">
                             <span class="checkbox-text">CONFIRMO que estou no local correto.</span>
                         </label>
 
-                        <div id="containerPerguntaProdutos" style="display: none;">
-                            <label style="margin-bottom: 6px; display: block;">Quantos produtos vais descarregar?</label>
-                            <div class="grid-selector">
-                                <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(1, this)">1 produto</button>
-                                <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(2, this)">2 produtos</button>
-                                <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(3, this)">3 produtos</button>
-                                <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(4, this)">4 produtos</button>
-                                <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(5, this)">5 produtos</button>
-                                <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(6, this)">6 produtos</button>
-                            </div>
-                        </div>
-
-                        <div id="containerPerguntaTanques" style="display: none;">
-                            <label style="margin-bottom: 6px; display: block;">Para quantos tanques vai descarregar?</label>
-                            <div class="grid-selector">
-                                <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(1, this)">1 tanque</button>
-                                <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(2, this)">2 tanques</button>
-                                <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(3, this)">3 tanques</button>
-                                <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(4, this)">4 tanques</button>
-                                <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(5, this)">5 tanques</button>
-                                <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(6, this)">6 tanques</button>
-                            </div>
-                        </div>
-
-                        <div id="erroTanquesProdutos" style="display: none; color: #d70015; font-size: 0.8rem; font-weight: 600; text-align: center; background: rgba(255, 59, 48, 0.1); padding: 8px; border-radius: var(--radius-small); border: 1px solid rgba(255, 59, 48, 0.3);">
-                            ⚠️ O número de tanques tem de ser superior ou igual ao número de produtos!
-                        </div>
-
                         <div class="nav-buttons">
-                            <button type="button" id="btnAvancarTanques" class="btn-nav btn-next" disabled="" onclick="avancarParaCalculo()">Continuar →</button>
+                            <button type="button" id="btnAvancarPasso4" class="btn-nav btn-next" disabled="" onclick="irParaPasso(5)">Continuar →</button>
                         </div>
                     </div>
                 </div>
@@ -2614,9 +2605,61 @@
                 </div>
             </div>
 
-            <!-- PASSO 5: Form de Tanques -->
+            <!-- PASSO 5: Produtos -->
             <div id="step5" class="step">
-                <div class="question-title">Capacidade Total Tanques Cliente</div>
+                <div class="question-title">Passo 5 • Produtos</div>
+
+                <div class="posto-card">
+                    <div>
+                        <label style="margin-bottom: 6px; display: block;">Quantos produtos vai descarregar?</label>
+                        <div class="grid-selector">
+                            <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(1, this)">1 produto</button>
+                            <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(2, this)">2 produtos</button>
+                            <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(3, this)">3 produtos</button>
+                            <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(4, this)">4 produtos</button>
+                            <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(5, this)">5 produtos</button>
+                            <button type="button" class="btn-option btn-produto" style="justify-content: center;" onclick="selecionarQtdProdutos(6, this)">6 produtos</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-buttons">
+                    <button type="button" class="btn-nav btn-prev" onclick="irParaPasso(4)">← Voltar (Localização do Posto)</button>
+                    <button type="button" id="btnAvancarPasso5" class="btn-nav btn-next" disabled="" onclick="irParaPasso(6)">Continuar →</button>
+                </div>
+            </div>
+
+            <!-- PASSO 6: Tanques -->
+            <div id="step6" class="step">
+                <div class="question-title">Passo 6 • Tanques</div>
+
+                <div class="posto-card">
+                    <div>
+                        <label style="margin-bottom: 6px; display: block;">Para quantos tanques vai descarregar?</label>
+                        <div class="grid-selector">
+                            <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(1, this)">1 tanque</button>
+                            <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(2, this)">2 tanques</button>
+                            <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(3, this)">3 tanques</button>
+                            <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(4, this)">4 tanques</button>
+                            <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(5, this)">5 tanques</button>
+                            <button type="button" class="btn-option btn-tanque" style="justify-content: center;" onclick="selecionarQtdTanques(6, this)">6 tanques</button>
+                        </div>
+                    </div>
+
+                    <div id="erroTanquesProdutos" style="display: none; color: #d70015; font-size: 0.8rem; font-weight: 600; text-align: center; background: rgba(255, 59, 48, 0.1); padding: 8px; border-radius: var(--radius-small); border: 1px solid rgba(255, 59, 48, 0.3);">
+                        ⚠️ O número de tanques tem de ser superior ou igual ao número de produtos!
+                    </div>
+                </div>
+
+                <div class="nav-buttons">
+                    <button type="button" class="btn-nav btn-prev" onclick="irParaPasso(5)">← Voltar (Produtos)</button>
+                    <button type="button" id="btnAvancarPasso6" class="btn-nav btn-next" disabled="" onclick="avancarParaCalculo()">Continuar →</button>
+                </div>
+            </div>
+
+            <!-- PASSO 7: Produtos & Sondagem -->
+            <div id="step7" class="step">
+                <div class="question-title">Passo 7 • Produtos & Sondagem</div>
                 <div class="posto-confirmado-card" id="postoConfirmadoCard">
                     <div class="posto-gps-side" role="status" aria-live="polite">
                         <span class="posto-gps-message checking" data-gps-card-status>Aguardando confirmação...</span>
@@ -2630,21 +2673,21 @@
                 <div id="tanksContainer"></div>
 
                 <div class="nav-buttons">
-                    <button type="button" class="btn-nav btn-prev" onclick="pedirConfirmacaoVoltarTanques()">← Voltar (Localização &amp; Tanques)</button>
+                    <button type="button" class="btn-nav btn-prev" onclick="pedirConfirmacaoVoltarTanques()">← Voltar (Tanques)</button>
                     <button type="button" id="btnFinalizarDescarga" class="btn-nav btn-next" disabled="" onclick="iniciarFinalizacaoDescarga()">Finalizar</button>
                 </div>
             </div>
 
-            <!-- PASSO 6: Finalização e relatório -->
-            <div id="step6" class="step">
-                <div class="question-title">Finalizar descarga</div>
+            <!-- PASSO 8: Finalização e relatório -->
+            <div id="step8" class="step">
+                <div class="question-title">Passo 8 • Finalizar descarga</div>
                 <div class="final-actions-card">
                     <p id="finalizacaoMensagem" style="margin: 0; color: var(--text-secondary);">Confirme abaixo para concluir o relatório.</p>
                     <input type="file" id="inputTicketSondagem" accept="image/*" capture="environment" style="display: none;" onchange="processarFotoTicket(event)">
                     <img id="ticketSondagemPreview" class="ticket-preview" alt="Ticket de sondagem">
                 </div>
                 <div class="nav-buttons">
-                    <button type="button" class="btn-nav btn-prev" onclick="irParaPasso(5)">← Voltar (Tanques)</button>
+                    <button type="button" class="btn-nav btn-prev" onclick="irParaPasso(7)">← Voltar (Produtos & Sondagem)</button>
                     <button type="button" class="btn-nav btn-pdf" onclick="exportarPDF()">📄 Exportar PDF</button>
                     <button type="button" class="btn-nav btn-email" onclick="enviarParaOutlook()">✉️ Enviar e-mail</button>
                 </div>
@@ -2745,7 +2788,7 @@
         <div class="modal-card" style="max-width: 320px; text-align: center; border-radius: 20px;">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">⚠️</div>
             <div id="tituloConfirmarVoltarTanques" style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Confirmar</div>
-            <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.3;">Se voltar atrás, perde a informação inserida. Confirmar?</div>
+            <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.3;">Se voltar atrás, perde a informação inserida nos tanques. Confirmar?</div>
             <button type="button" class="btn-save-modal" style="background-color: #34c759; margin-top: 0;" onclick="confirmarVoltarTanques()">Sim</button>
             <button type="button" class="btn-nav btn-prev" style="margin-top: 6px; width: 100%; border-radius: var(--radius-medium);" onclick="fecharConfirmacaoVoltarTanques()">Não</button>
         </div>
@@ -3319,7 +3362,7 @@
 
         function pedirConfirmacaoVoltarTanques() {
             if (!haDadosInseridosNosTanques()) {
-                irParaPasso(4);
+                irParaPasso(6);
                 return;
             }
             document.getElementById('modalConfirmarVoltarTanques').classList.add('active');
@@ -3338,7 +3381,7 @@
             campoAConfirmarId = null;
             gerarFormularioTanques();
             fecharConfirmacaoVoltarTanques();
-            irParaPasso(4);
+            irParaPasso(6);
         }
 
         function validarPasso1() {
@@ -4037,7 +4080,6 @@
             document.getElementById('noPostoResults').style.display = 'none';
             document.getElementById('postoProfileView').classList.remove('active');
             postoSelecionadoAtual = null;
-            validarAvancoStep3();
         }
 
         function filterPostoOptionsList() {
@@ -4177,7 +4219,6 @@
             }
 
             document.getElementById('postoCustomDropdown').classList.remove('open');
-            validarAvancoStep3();
         }
 
         function inicializarSliderFotos(listaFotos) {
@@ -4675,7 +4716,7 @@
 
         function concluirVerificacaoGps() {
             verificacaoGpsEmCurso = false;
-            if (repetirVerificacaoGps && (passoAtual === 4 || passoAtual === 5) && postoSelecionadoAtual) {
+            if (repetirVerificacaoGps && (passoAtual === 4 || passoAtual === 7) && postoSelecionadoAtual) {
                 repetirVerificacaoGps = false;
                 setTimeout(calcularDistanciaAtualPosto, 100);
             }
@@ -4794,37 +4835,34 @@
         }
 
 
+        function validarContinuacaoPasso4() {
+            const chk = document.getElementById('chkConfirmacao').checked;
+            const btnAvancar = document.getElementById('btnAvancarPasso4');
+            btnAvancar.disabled = !chk;
+            if (chk) calcularDistanciaAtualPosto();
+        }
+
         function selecionarQtdProdutos(qtd, elemento) {
             totalProdutos = qtd;
             document.querySelectorAll('.btn-produto').forEach(btn => btn.classList.remove('selected'));
             elemento.classList.add('selected');
-            document.getElementById('containerPerguntaTanques').style.display = 'block';
-            validarAvancoStep3();
+            validarAvancoPasso5();
         }
 
         function selecionarQtdTanques(qtd, elemento) {
             totalTanques = qtd;
             document.querySelectorAll('.btn-tanque').forEach(btn => btn.classList.remove('selected'));
             elemento.classList.add('selected');
-            validarAvancoStep3();
+            validarAvancoPasso6();
         }
 
-        function mostrarPerguntaProdutos() {
-            const confirmado = document.getElementById('chkConfirmacao').checked;
-            document.getElementById('containerPerguntaProdutos').style.display = confirmado ? 'block' : 'none';
-            if (confirmado) calcularDistanciaAtualPosto();
-            if (!confirmado) {
-                totalProdutos = 0;
-                totalTanques = 0;
-                document.getElementById('containerPerguntaTanques').style.display = 'none';
-                document.querySelectorAll('.btn-produto, .btn-tanque').forEach(btn => btn.classList.remove('selected'));
-            }
-            validarAvancoStep3();
+        function validarAvancoPasso5() {
+            const btnAvancar = document.getElementById('btnAvancarPasso5');
+            btnAvancar.disabled = !(totalProdutos > 0);
         }
 
-        function validarAvancoStep3() {
-            const chk = document.getElementById('chkConfirmacao').checked;
-            const btnAvancar = document.getElementById('btnAvancarTanques');
+        function validarAvancoPasso6() {
+            const btnAvancar = document.getElementById('btnAvancarPasso6');
             const erroDiv = document.getElementById('erroTanquesProdutos');
 
             let erroTanques = false;
@@ -4839,7 +4877,7 @@
                 erroDiv.style.display = 'none';
             }
 
-            btnAvancar.disabled = !(postoSelecionadoAtual !== null && chk && totalProdutos > 0 && totalTanques > 0 && !erroTanques);
+            btnAvancar.disabled = !(totalProdutos > 0 && totalTanques > 0 && !erroTanques);
         }
 
         function obterNomeLocalPosto() {
@@ -4906,7 +4944,7 @@
             pdfExtra.style.display = temExtra ? 'block' : 'none';
             
             gerarFormularioTanques();
-            irParaPasso(5);
+            irParaPasso(7);
         }
 
         function gerarFormularioTanques() {
@@ -5241,7 +5279,7 @@
             document.getElementById('finalizacaoMensagem').innerText = fotoTicketSondagem
                 ? 'Ticket de sondagem preparado para anexar ao e-mail. Escolha uma opção abaixo.'
                 : 'Relatório concluído sem ticket de sondagem. Escolha uma opção abaixo.';
-            irParaPasso(6);
+            irParaPasso(8);
         }
 
         function pedirConfirmacaoValor(idInput, tipoCampo, indexTanque) {
@@ -5829,7 +5867,7 @@
             document.getElementById('pdfDataHora').innerText = agora.toLocaleString('pt-PT');
             const passoVisivelAntesDoPdf = passoAtual;
             document.querySelectorAll('.step').forEach(passo => passo.classList.remove('active'));
-            document.getElementById('step5').classList.add('active');
+            document.getElementById('step7').classList.add('active');
             
             const element = document.getElementById('exportArea');
             document.body.classList.add('pdf-mode');
