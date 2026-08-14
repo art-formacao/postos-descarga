@@ -2213,6 +2213,143 @@
             }
         }
 
+
+        /* Ajustes responsivos: mantém as cartas organizadas em telemóveis. */
+        @media (max-width: 600px) {
+            /* Perfil do posto: preserva as duas colunas, sem texto cortado. */
+            #step4 .profile-main-grid {
+                height: clamp(292px, 82vw, 340px);
+            }
+
+            #step4 .profile-location-heading {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 2px;
+                white-space: normal;
+                line-height: 1.15;
+            }
+
+            #step4 .profile-location-heading > span:first-child {
+                font-size: 0.72rem;
+            }
+
+            #step4 .profile-location-heading .gps-status-title {
+                display: block;
+                max-width: 100%;
+                font-size: 0.68rem;
+                line-height: 1.15;
+                overflow-wrap: normal;
+                word-break: normal;
+            }
+
+            #step4 .profile-location-row {
+                flex: 0 0 43%;
+            }
+
+            #step4 .profile-observation-row {
+                flex: 1 1 auto;
+            }
+
+            #step4 .profile-detail-row > label {
+                font-size: 0.76rem;
+                line-height: 1.2;
+            }
+
+            #step4 .profile-detail-row .gps-distance-box {
+                font-size: 0.68rem;
+                line-height: 1.2;
+            }
+
+            #step4 .profile-detail-row .btn-recalc-gps {
+                min-height: 31px;
+                padding: 5px 4px;
+                font-size: 0.67rem;
+                line-height: 1.15;
+            }
+
+            #step4 .profile-detail-row .view-obs-box {
+                padding: 7px;
+                font-size: 0.69rem;
+                line-height: 1.25;
+                overflow-wrap: break-word;
+            }
+
+            #step4 .profile-risks-row {
+                padding: 6px 8px 8px;
+            }
+
+            #step4 .profile-risks-row .btn-riscos-rotas {
+                min-height: 38px;
+                padding: 6px;
+                font-size: 0.7rem;
+                line-height: 1.15;
+                white-space: normal;
+            }
+
+            /* Capacidade dos tanques: mantém estado, distância, botão e posto
+               em colunas horizontais, como no tablet. */
+            #step5 .posto-confirmado-card {
+                grid-template-columns: 108px minmax(0, 1fr);
+                gap: 8px;
+                align-items: center;
+                padding: 9px 8px;
+            }
+
+            #step5 .posto-gps-side {
+                width: 100%;
+                align-items: stretch;
+            }
+
+            #step5 .posto-gps-message {
+                font-size: 0.64rem;
+                line-height: 1.15;
+                overflow-wrap: normal;
+                word-break: normal;
+                hyphens: none;
+            }
+
+            #step5 .posto-gps-distance {
+                font-size: 0.62rem;
+                line-height: 1.2;
+                overflow-wrap: normal;
+                word-break: normal;
+            }
+
+            #step5 .posto-recalc-button {
+                width: 100%;
+                min-height: 32px;
+                padding: 5px 4px;
+                font-size: 0.62rem;
+                line-height: 1.15;
+                white-space: normal;
+            }
+
+            #step5 #infoPostoConfirmado {
+                width: 100%;
+                font-size: 0.68rem;
+                line-height: 1.32;
+                overflow-wrap: break-word;
+                word-break: normal;
+            }
+        }
+
+        @media (max-width: 360px) {
+            #step5 .posto-confirmado-card {
+                grid-template-columns: 98px minmax(0, 1fr);
+                gap: 6px;
+            }
+
+            #step5 .posto-gps-message,
+            #step5 .posto-recalc-button {
+                font-size: 0.58rem;
+            }
+
+            #step5 .posto-gps-distance,
+            #step5 #infoPostoConfirmado {
+                font-size: 0.6rem;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -3104,8 +3241,8 @@
                 document.getElementById('headerTitle').innerText = "Verificação de Descarga";
             }
 
-            // A posição GPS só é atualizada pela confirmação no passo 4
-            // ou pelo botão "Recalcular posição" existente no passo 5.
+            // O GPS é verificado ao entrar no Perfil do Posto após a seleção,
+            // novamente ao confirmar o local e pelo botão do passo 5.
 
             window.scrollTo(0, 0);
         }
@@ -3989,6 +4126,10 @@
                 profileView.classList.add('active');
                 prepararLocalizacaoParaConfirmacao();
                 irParaPasso(4);
+
+                // Primeira verificação automática: ocorre uma única vez ao entrar
+                // no Perfil do Posto após selecionar o posto no passo 3.
+                setTimeout(calcularDistanciaAtualPosto, 100);
             }
 
             document.getElementById('postoCustomDropdown').classList.remove('open');
